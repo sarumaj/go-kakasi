@@ -62,6 +62,17 @@ func decodeEscapes(s string) string {
 	return strings.NewReplacer(replacements...).Replace(s)
 }
 
+// deref dereferences a pointer.
+// If the pointer is nil, the zero value of the type is returned.
+func deref[T any](v *T) T {
+	if v == nil {
+		var zero T
+		return zero
+	}
+
+	return *v
+}
+
 // dump writes a value to a file in JSON format.
 // The file will be created if it doesn't exist, and truncated if it does.
 // The directory structure will be created if it doesn't exist a priori.
@@ -77,17 +88,6 @@ func dumpJSON(dst string, v any, indent string) error {
 	enc := json.NewEncoder(o)
 	enc.SetIndent("", indent)
 	return enc.Encode(v)
-}
-
-// mapAdd adds a value to a slice in a map.
-func mapAdd[K comparable, T any](m map[K][]T, k K, v T) map[K][]T {
-	if got, ok := m[k]; ok {
-		m[k] = append(got, v)
-		return m
-	}
-
-	m[k] = []T{v}
-	return m
 }
 
 // mapGet gets a value from a map.

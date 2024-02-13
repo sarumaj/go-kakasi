@@ -7,6 +7,18 @@ import (
 	"strings"
 )
 
+// lookupMapResources is a map of target and source files.
+// The target file is the destination file.
+var lookupMapResources = map[string]string{
+	"hepburndict3.json":  "data/hepburndict.utf8",
+	"kunreidict3.json":   "data/kunreidict.utf8",
+	"passportdict3.json": "data/passportdict.utf8",
+	"hepburnhira3.json":  "data/hepburnhira.utf8",
+	"kunreihira3.json":   "data/kunreihira.utf8",
+	"passporthira3.json": "data/passporthira.utf8",
+	"halfkana3.json":     "data/halfkana.utf8",
+}
+
 // lookupMap is a lookup table.
 // It maps a string to a string.
 type lookupMap map[string]string
@@ -31,7 +43,11 @@ func (m lookupMap) MaxKeyLen() int {
 // makeLookupMap creates a lookup table from a source file and writes it to a destination file.
 // It returns the lookup table and an error if any.
 // The source file is expected to have lines in the format "value key".
-func makeLookupMap(src, dst string) (lookupMap, error) {
+func makeLookupMap(src string) (lookupMap, error) {
+	if err := verifyLookupMapSource(src); err != nil {
+		return nil, err
+	}
+
 	f, err := os.OpenFile(src, os.O_RDONLY, os.ModePerm)
 	if err != nil {
 		return nil, err
@@ -50,9 +66,19 @@ func makeLookupMap(src, dst string) (lookupMap, error) {
 
 	m.Set("_max_key_len_", fmt.Sprintf("%d", m.MaxKeyLen()))
 
-	if err := dumpJSON(dst, m, ""); err != nil {
-		return nil, err
+	return m, nil
+}
+
+// verifyLookupMapSource verifies the source file.
+// It returns an error if the source file is invalid.
+// The source file is invalid if it is not in the lookupMapResources.
+func verifyLookupMapSource(src string) error {
+	for _, v := range lookupMapResources {
+		if v == src {
+			_, err := os.Stat(src)
+			return err
+		}
 	}
 
-	return m, nil
+	return fmt.Errorf("invalid source: %s", src)
 }

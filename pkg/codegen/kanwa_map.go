@@ -2,6 +2,7 @@ package codegen
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"strings"
 )
@@ -35,15 +36,27 @@ var cLetters = map[rune][]string{
 	'v': {"ゔ"},
 }
 
-// kanwaMap is a map of runes to a map of strings to kanjiCtx.
-// It is used to generate the kanwa map.
-// Each rune represents a beginning of a kanji character or a phrase in the Japanese language.
-type kanwaMap map[rune]kanjiCtxMap
+// kanwaMapResources is a map of target and source files.
+// The target file is the destination file.
+var kanwaMapResources = map[string][]string{
+	"kanwadict4.json": {
+		"data/kakasidict.utf8",
+		"data/unidict_noun.utf8",
+		"data/unidict_adj.utf8",
+	},
+}
 
-func (m kanwaMap) Get(k rune) kanjiCtxMap    { return mapGet(m, k) }
-func (m kanwaMap) Has(k rune) bool           { return mapHas(m, k) }
-func (m kanwaMap) Keys() []rune              { return mapKeys(m) }
-func (m kanwaMap) Set(k rune, v kanjiCtxMap) { m = mapSet(m, k, v) }
+// kanjiCtx is a kanji character or a phrase in the Japanese language.
+// It has a yomi and a list of contexts.
+// yomi is the reading of the kanji character or phrase.
+// ctx is a list of contexts in which the kanji character or phrase is used.
+type kanjiCtx [2]any
+
+func (m kanjiCtx) AppendCtx(v ...string) { r, _ := m[1].([]string); m[1] = append(r, v...) }
+func (m kanjiCtx) GetCtx() []string      { r, _ := m[1].([]string); return r }
+func (m kanjiCtx) GetYomi() string       { r, _ := m[0].(string); return r }
+func (m *kanjiCtx) SetCtx(v []string)    { m[1] = v }
+func (m *kanjiCtx) SetYomi(v string)     { m[0] = v }
 
 // kanjiCtxMap is a map of strings to kanjiCtx.
 // It is used to generate the kanwa map.
@@ -55,18 +68,15 @@ func (m kanjiCtxMap) Has(k string) bool        { return mapHas(m, k) }
 func (m kanjiCtxMap) Keys() []string           { return mapKeys(m) }
 func (m kanjiCtxMap) Set(k string, v kanjiCtx) { m = mapSet(m, k, v) }
 
-// kanjiCtx is a kanji character or a phrase in the Japanese language.
-// It has a yomi and a list of contexts.
-// Yomi is the reading of the kanji character or phrase.
-// Ctx is a list of contexts in which the kanji character or phrase is used.
-type kanjiCtx struct {
-	Yomi string   `json:"yomi"`
-	Ctx  []string `json:"ctx"`
-}
+// kanwaMap is a map of runes to a map of strings to kanjiCtx.
+// It is used to generate the kanwa map.
+// Each rune represents a beginning of a kanji character or a phrase in the Japanese language.
+type kanwaMap map[rune]kanjiCtxMap
 
-func (m *kanjiCtx) AppendCtx(v ...string) { m.Ctx = append(m.Ctx, v...) }
-func (m *kanjiCtx) SetCtx(v []string)     { m.Ctx = v }
-func (m *kanjiCtx) SetYomi(v string)      { m.Yomi = v }
+func (m kanwaMap) Get(k rune) kanjiCtxMap    { return mapGet(m, k) }
+func (m kanwaMap) Has(k rune) bool           { return mapHas(m, k) }
+func (m kanwaMap) Keys() []rune              { return mapKeys(m) }
+func (m kanwaMap) Set(k rune, v kanjiCtxMap) { m = mapSet(m, k, v) }
 
 // parseLine parses a line from a file and updates the kanwa map.
 // The line is expected to have the format "yomi kanji [ctx ...]".
@@ -102,7 +112,7 @@ func (m kanwaMap) update(kanji, yomi, tail string, token_ctx ...string) {
 		kanji_runes := []rune(kanji)
 		c := kanji_runes[0]
 		if !m.Has(c) {
-			m.Set(c, kanjiCtxMap{kanji: kanjiCtx{Yomi: yomi, Ctx: token_ctx}})
+			m.Set(c, kanjiCtxMap{kanji: kanjiCtx{yomi, token_ctx}})
 			return
 		}
 
@@ -114,7 +124,7 @@ func (m kanwaMap) update(kanji, yomi, tail string, token_ctx ...string) {
 			gotKanjiCtxMap.Set(kanji, gotKanjiCtx)
 
 		} else {
-			gotKanjiCtxMap.Set(kanji, kanjiCtx{Yomi: yomi, Ctx: token_ctx})
+			gotKanjiCtxMap.Set(kanji, kanjiCtx{yomi, token_ctx})
 
 		}
 
@@ -138,7 +148,11 @@ func (m kanwaMap) update(kanji, yomi, tail string, token_ctx ...string) {
 // The yomi is the reading of the kanji character or phrase.
 // The kanji is the kanji character or phrase.
 // The ctx is a list of contexts in which the kanji character or phrase is used.
-func makeKanwa(src_list []string, dst string) (kanwaMap, error) {
+func makeKanwaMap(src_list []string) (kanwaMap, error) {
+	if err := verifyKanwaMapSourceList(src_list); err != nil {
+		return nil, err
+	}
+
 	m := make(kanwaMap)
 	for _, src := range src_list {
 		f, err := os.OpenFile(src, os.O_RDONLY, os.ModePerm)
@@ -156,9 +170,28 @@ func makeKanwa(src_list []string, dst string) (kanwaMap, error) {
 		}
 	}
 
-	if err := dumpJSON(dst, m, ""); err != nil {
-		return nil, err
+	return m, nil
+}
+
+// verifyKanwaMapSourceList verifies the source files.
+// It returns an error if the source files are invalid.
+// The source files are invalid if they are not in the list of resources or if they do not exist.
+func verifyKanwaMapSourceList(src_list []string) error {
+	if len(src_list) == 0 {
+		return nil
 	}
 
-	return m, nil
+	for _, v_list := range kanwaMapResources {
+		for _, v := range v_list {
+			if v == src_list[0] {
+				_, err := os.Stat(src_list[0])
+				return err
+			}
+		}
+	}
+	if len(src_list) > 1 {
+		return verifyKanwaMapSourceList(src_list[1:])
+	}
+
+	return fmt.Errorf("invalid source: %v", src_list)
 }
