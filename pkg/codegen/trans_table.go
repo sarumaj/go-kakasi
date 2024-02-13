@@ -14,12 +14,13 @@ type transTable map[rune][]string
 func (m transTable) Add(c rune, v string)   { m = mapAdd(m, c, v) }
 func (m transTable) Has(c rune) bool        { return mapHas(m, c) }
 func (m transTable) Get(c rune) []string    { return mapGet(m, c) }
+func (m transTable) Keys() []rune           { return mapKeys(m) }
 func (m transTable) Set(c rune, v []string) { m = mapSet(m, c, v) }
 
-// Spoof adds a range of runes to the table.
+// spoof adds a range of runes to the table.
 // If a rune is already in the table, it is skipped.
 // If a rune is not in the table, it is added with an empty slice of strings.
-func (m transTable) Spoof(lo, hi int64) {
+func (m transTable) spoof(lo, hi int64) {
 	for i := lo; i <= hi; i++ {
 		c := rune(i)
 		if _, ok := m[c]; ok {
@@ -38,6 +39,7 @@ func makeTransTable(src, dst string) (transTable, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	defer f.Close()
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -58,10 +60,10 @@ func makeTransTable(src, dst string) (transTable, error) {
 		m.Add(c, v)
 	}
 
-	m.Spoof(0xFE00, 0xFE02)
-	m.Spoof(0xE0110, 0xE01EF)
+	m.spoof(0xFE00, 0xFE02)
+	m.spoof(0xE0110, 0xE01EF)
 
-	if err := dump(dst, m, ""); err != nil {
+	if err := dumpJSON(dst, m, ""); err != nil {
 		return nil, err
 	}
 

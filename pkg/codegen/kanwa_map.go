@@ -40,8 +40,9 @@ var cLetters = map[rune][]string{
 // Each rune represents a beginning of a kanji character or a phrase in the Japanese language.
 type kanwaMap map[rune]kanjiCtxMap
 
-func (m kanwaMap) Has(k rune) bool           { return mapHas(m, k) }
 func (m kanwaMap) Get(k rune) kanjiCtxMap    { return mapGet(m, k) }
+func (m kanwaMap) Has(k rune) bool           { return mapHas(m, k) }
+func (m kanwaMap) Keys() []rune              { return mapKeys(m) }
 func (m kanwaMap) Set(k rune, v kanjiCtxMap) { m = mapSet(m, k, v) }
 
 // kanjiCtxMap is a map of strings to kanjiCtx.
@@ -49,8 +50,9 @@ func (m kanwaMap) Set(k rune, v kanjiCtxMap) { m = mapSet(m, k, v) }
 // Each string represents a kanji character.
 type kanjiCtxMap map[string]kanjiCtx
 
-func (m kanjiCtxMap) Has(k string) bool        { return mapHas(m, k) }
 func (m kanjiCtxMap) Get(k string) kanjiCtx    { return mapGet(m, k) }
+func (m kanjiCtxMap) Has(k string) bool        { return mapHas(m, k) }
+func (m kanjiCtxMap) Keys() []string           { return mapKeys(m) }
 func (m kanjiCtxMap) Set(k string, v kanjiCtx) { m = mapSet(m, k, v) }
 
 // kanjiCtx is a kanji character or a phrase in the Japanese language.
@@ -61,6 +63,10 @@ type kanjiCtx struct {
 	Yomi string   `json:"yomi"`
 	Ctx  []string `json:"ctx"`
 }
+
+func (m *kanjiCtx) AppendCtx(v ...string) { m.Ctx = append(m.Ctx, v...) }
+func (m *kanjiCtx) SetCtx(v []string)     { m.Ctx = v }
+func (m *kanjiCtx) SetYomi(v string)      { m.Yomi = v }
 
 // parseLine parses a line from a file and updates the kanwa map.
 // The line is expected to have the format "yomi kanji [ctx ...]".
@@ -103,7 +109,8 @@ func (m kanwaMap) update(kanji, yomi, tail string, token_ctx ...string) {
 		gotKanjiCtxMap := m.Get(c)
 		if gotKanjiCtxMap.Has(kanji) {
 			gotKanjiCtx := gotKanjiCtxMap.Get(kanji)
-			gotKanjiCtx.Ctx = append(gotKanjiCtx.Ctx, token_ctx...)
+			gotKanjiCtx.SetYomi(yomi)
+			gotKanjiCtx.AppendCtx(token_ctx...)
 			gotKanjiCtxMap.Set(kanji, gotKanjiCtx)
 
 		} else {
@@ -149,7 +156,7 @@ func makeKanwa(src_list []string, dst string) (kanwaMap, error) {
 		}
 	}
 
-	if err := dump(dst, m, ""); err != nil {
+	if err := dumpJSON(dst, m, ""); err != nil {
 		return nil, err
 	}
 

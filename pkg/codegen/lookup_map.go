@@ -11,8 +11,9 @@ import (
 // It maps a string to a string.
 type lookupMap map[string]string
 
-func (m lookupMap) Has(k string) bool   { return mapHas(m, k) }
 func (m lookupMap) Get(k string) string { return mapGet(m, k) }
+func (m lookupMap) Has(k string) bool   { return mapHas(m, k) }
+func (m lookupMap) Keys() []string      { return mapKeys(m) }
 func (m lookupMap) Set(k, v string)     { m = mapSet(m, k, v) }
 
 // MaxKeyLen returns the length of the longest key in the map.
@@ -49,7 +50,7 @@ func makeLookupMap(src, dst string) (lookupMap, error) {
 
 	m.Set("_max_key_len_", fmt.Sprintf("%d", m.MaxKeyLen()))
 
-	if err := dump(dst, m, ""); err != nil {
+	if err := dumpJSON(dst, m, ""); err != nil {
 		return nil, err
 	}
 

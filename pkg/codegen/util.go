@@ -65,7 +65,7 @@ func decodeEscapes(s string) string {
 // dump writes a value to a file in JSON format.
 // The file will be created if it doesn't exist, and truncated if it does.
 // The directory structure will be created if it doesn't exist a priori.
-func dump(dst string, v any, indent string) error {
+func dumpJSON(dst string, v any, indent string) error {
 	_ = os.MkdirAll(filepath.Dir(dst), os.ModePerm)
 	o, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
 	if err != nil {
@@ -90,15 +90,25 @@ func mapAdd[K comparable, T any](m map[K][]T, k K, v T) map[K][]T {
 	return m
 }
 
+// mapGet gets a value from a map.
+func mapGet[K comparable, T any](m map[K]T, k K) T {
+	return m[k]
+}
+
 // mapHas checks if a map has a key.
 func mapHas[K comparable, T any](m map[K]T, k K) bool {
 	_, ok := m[k]
 	return ok
 }
 
-// mapGet gets a value from a map.
-func mapGet[K comparable, T any](m map[K]T, k K) T {
-	return m[k]
+// mapKeys returns the keys of a map.
+func mapKeys[K comparable, T any](m map[K]T) []K {
+	keys := make([]K, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+
+	return keys
 }
 
 // mapSet sets a value in a map.
@@ -125,13 +135,13 @@ func traverseFile(ctx context.Context, in *os.File) <-chan string {
 				return
 
 			default:
-				switch line := sc.Text(); {
+				switch line := strings.TrimSpace(sc.Text()); {
 
-				case len(line) == 0 || strings.HasPrefix(line, ";;"):
+				case len(line) == 0, strings.HasPrefix(line, ";;"):
 					continue
 
 				default:
-					lines <- decodeEscapes(strings.TrimSpace(line))
+					lines <- decodeEscapes(line)
 				}
 			}
 
