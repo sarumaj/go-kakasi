@@ -1,11 +1,11 @@
+//go:generate go run gen.go -buildDir=../lib/properties/data
+
 package codegen
 
 import "path/filepath"
 
 // Generate is a code generation function that generates lookup maps, translation tables, and kanwa maps.
 // The generated files are written to the specified directory.
-//
-//go:generate go run gen.go -buildDir=build
 func Generate(dst string) error {
 	for tgt, src := range lookupMapResources {
 		m, err := makeLookupMap(src)

@@ -3,12 +3,13 @@ package codegen
 import (
 	"bufio"
 	"context"
-	"encoding/json"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/goccy/go-json"
 )
 
 // decodeEscapes decodes escape sequences in a string.

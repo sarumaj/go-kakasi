@@ -1,21 +1,47 @@
 {
   "cSpell.words": [
     "codegen",
+    "Endmark",
+    "Exclam",
+    "geta",
+    "goccy",
     "halfkana",
     "hepburndict",
     "hepburnhira",
+    "hosi",
+    "Itaiji",
     "itaijidict",
+    "Jisyo",
     "Kakasi",
     "kakasidict",
     "Kanwa",
     "kanwadict",
+    "kigou",
+    "Kunrei",
     "kunreidict",
     "kunreihira",
+    "kurikaesi",
+    "maru",
+    "mesu",
     "passportdict",
     "passporthira",
     "sarumaj",
+    "Sessi",
+    "setu",
+    "sime",
+    "Tilda",
     "unidic",
     "unidict",
-    "yomi"
+    "yomi",
+    "Zenkaku"
+  ],
+  "cSpell.ignoreWords": [
+    "ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏ",
+    "ÐÑÒÓÔÕÖ",
+    "ØÙÚÛÜÝ",
+    "øùúûüýþÿ",
+    "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ",
+    "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ",
+    "〱〲〳〴〵"
   ]
 }

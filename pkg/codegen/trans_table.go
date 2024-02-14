@@ -7,25 +7,25 @@ import (
 	"strings"
 )
 
-// transTableResources is a map of target and source files.
+// TransTableResources is a map of target and source files.
 // The target file is the destination file.
 var transTableResources = map[string]string{
 	"itaijidict4.json": "data/itaijidict.utf8",
 }
 
-// transTable is a translation table.
+// TransTable is a translation table.
 // It maps a rune to a list of strings.
-type transTable map[rune]*string
+type TransTable map[rune]*string
 
-func (m transTable) Has(c rune) bool      { return mapHas(m, c) }
-func (m transTable) Get(c rune) string    { return deref[string](mapGet(m, c)) }
-func (m transTable) Keys() []rune         { return mapKeys(m) }
-func (m transTable) Set(c rune, v string) { m = mapSet(m, c, &v) }
+func (m TransTable) Has(c rune) bool      { return mapHas(m, c) }
+func (m TransTable) Get(c rune) string    { return deref[string](mapGet(m, c)) }
+func (m TransTable) Keys() []rune         { return mapKeys(m) }
+func (m TransTable) Set(c rune, v string) { m = mapSet(m, c, &v) }
 
 // spoof adds a range of runes to the table.
 // If a rune is already in the table, it is skipped.
 // If a rune is not in the table, it is added with an empty slice of strings.
-func (m transTable) spoof(lo, hi int64) {
+func (m TransTable) spoof(lo, hi int64) {
 	for i := lo; i <= hi; i++ {
 		c := rune(i)
 		if _, ok := m[c]; ok {
@@ -39,7 +39,7 @@ func (m transTable) spoof(lo, hi int64) {
 // makeTransTable creates a translation table from a source file and writes it to a destination file.
 // It returns the translation table and an error if any.
 // The source file is expected to have lines in the format "value key".
-func makeTransTable(src string) (transTable, error) {
+func makeTransTable(src string) (TransTable, error) {
 	if err := verifyTransTableSource(src); err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func makeTransTable(src string) (transTable, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	m := make(transTable)
+	m := make(TransTable)
 	for line := range traverseFile(ctx, f) {
 		v, k, ok := strings.Cut(line, " ")
 		if !ok {

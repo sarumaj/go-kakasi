@@ -8,21 +8,15 @@ import (
 func Test_makeTransTable(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	for _, tt := range []struct {
-		name string
-		src  string
-		dst  string
-	}{
-		{"test#1", "data/itaijidict.utf8", "build/itaijidict4.json"},
-	} {
-		t.Run(tt.src, func(t *testing.T) {
-			m, err := makeTransTable(tt.src)
+	for dst, src := range transTableResources {
+		t.Run(src, func(t *testing.T) {
+			m, err := makeTransTable(src)
 			if err != nil {
 				t.Errorf("makeTransTable() error = %v", err)
 				return
 			}
 
-			if err := dumpJSON(filepath.Join(tmpDir, tt.dst), m, ""); err != nil {
+			if err := dumpJSON(filepath.Join(tmpDir, dst), m, ""); err != nil {
 				t.Errorf("dumpJSON() error = %v", err)
 			}
 		})
