@@ -1,4 +1,4 @@
-//go:generate go run gen.go -buildDir=../lib/properties/data
+//go:generate go run ../../scripts/gen.go -buildDir=../lib/properties/data
 
 package codegen
 
