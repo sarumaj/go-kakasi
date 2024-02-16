@@ -7,10 +7,10 @@ import (
 	"strings"
 )
 
-// cLetters is a map of runes to a list of strings.
+// CLetters is a map of runes to a list of strings.
 // It is used to generate the kanwa map.
 // Each rune represents a list of sounds in the Japanese language.
-var cLetters = map[rune][]string{
+var CLetters = map[rune][]string{
 	'a': {"あ", "ぁ", "っ", "わ", "ゎ"},
 	'i': {"い", "ぃ", "っ", "ゐ"},
 	'u': {"う", "ぅ", "っ"},
@@ -132,7 +132,7 @@ func (m KanwaMap) update(kanji, yomi, tail string, token_ctx ...string) {
 		return
 	}
 
-	got, ok := cLetters[rune(tail[0])]
+	got, ok := CLetters[rune(tail[0])]
 	if !ok {
 		return
 	}

@@ -30,10 +30,17 @@ func (m LookupMap) Set(k, v string)     { m = mapSet(m, k, v) }
 
 // MaxKeyLen returns the length of the longest key in the map.
 func (m LookupMap) MaxKeyLen() int {
+	if m.Has("_max_key_len_") {
+		var l int
+		if _, err := fmt.Sscanf(m.Get("_max_key_len_"), "%d", &l); err == nil {
+			return l
+		}
+	}
+
 	l := 0
 	for k := range m {
-		if len(k) > l {
-			l = len(k)
+		if len([]rune(k)) > l {
+			l = len([]rune(k))
 		}
 	}
 
