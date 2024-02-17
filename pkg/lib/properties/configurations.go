@@ -23,6 +23,17 @@ func (configurations) jisyoKunreiHira() string      { return "data/kunreihira3.j
 func (configurations) jisyoPassport() string        { return "data/passportdict3.json" }
 func (configurations) jisyoPassportHira() string    { return "data/passporthira3.json" }
 
+func (configurations) decode(path string, v any) error {
+	f, err := dataFS.Open(path)
+	if err != nil {
+		return err
+	}
+
+	defer f.Close()
+
+	return json.NewDecoder(f).Decode(v)
+}
+
 func (c configurations) JisyoHalfkana() (codegen.LookupMap, error) {
 	var v codegen.LookupMap
 	if err := c.decode(c.jisyoHalfkana(), &v); err != nil {
@@ -102,15 +113,4 @@ func (c configurations) JisyoPassportHira() (codegen.LookupMap, error) {
 	}
 
 	return v, nil
-}
-
-func (c configurations) decode(path string, v any) error {
-	f, err := dataFS.Open(path)
-	if err != nil {
-		return err
-	}
-
-	defer f.Close()
-
-	return json.NewDecoder(f).Decode(v)
 }
