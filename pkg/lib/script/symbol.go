@@ -42,28 +42,29 @@ func (s Symbol) convert_a(text string) (string, int, error) {
 
 	switch ch := []rune(text)[0]; {
 	case properties.Ch.IdeographicSpace() <= ch && ch <= properties.Ch.PostalMarkFace():
-		// TODO: implement conversion
+		converted = properties.ConvertTables.SymbolTable1()[ch-properties.Ch.IdeographicSpace()]
 
 	case properties.Ch.WavyDash() <= ch && ch <= properties.Ch.IdeographicHalfFillSpace():
-		// TODO: implement conversion
+		converted = properties.ConvertTables.SymbolTable2()[ch-properties.Ch.WavyDash()]
 
 	case properties.Ch.GreeceAlpha() <= ch && ch <= properties.Ch.GreeceOmega():
-		// TODO: implement conversion
+		converted = properties.ConvertTables.SymbolTable3()[ch-properties.Ch.GreeceAlpha()]
 
 	case properties.Ch.Greece_alpha() <= ch && ch <= properties.Ch.Greece_omega():
-		// TODO: implement conversion
+		converted = properties.ConvertTables.SymbolTable4()[ch-properties.Ch.Greece_alpha()]
 
-	case properties.Ch.CyrillicA() <= ch && ch <= properties.Ch.Cyrillic_ya():
-		// TODO: implement conversion
+	case
+		properties.Ch.CyrillicA() <= ch && ch <= properties.Ch.Cyrillic_ya(),
+		ch == properties.Ch.CyrillicE(),
+		ch == properties.Ch.Cyrillic_e():
 
-	case ch == properties.Ch.CyrillicE(), ch == properties.Ch.Cyrillic_e():
-		// TODO: implement conversion
+		converted = properties.ConvertTables.CyrillicTable()[ch]
 
 	case properties.Ch.ZenkakuExcMark() <= ch && ch <= properties.Ch.ZenkakuSlashMark():
-		// TODO: implement conversion
+		converted = properties.ConvertTables.SymbolTable5()[ch-properties.Ch.ZenkakuExcMark()]
 
 	case properties.Ch.ZenkakuNumberZero() <= ch && ch <= properties.Ch.ZenkakuNumberNine():
-		// TODO: implement conversion
+		converted = string(ch - properties.Ch.ZenkakuNumberZero() + '0')
 
 	case 0xFF20 <= ch && ch <= 0xFF40:
 		converted = string(0x0041 + ch - 0xFE21) // convert full-width uppercase letters to half-width uppercase letters
@@ -72,7 +73,12 @@ func (s Symbol) convert_a(text string) (string, int, error) {
 		converted = string(0x0061 + ch - 0xFF41) // convert full-width lowercase letters to half-width lowercase letters
 
 	case properties.Ch.Latin1InvertedExclam() <= ch && ch <= properties.Ch.Latin1YDiaeresis():
-		// TODO: implement conversion
+		converted = properties.ConvertTables.Latin1Table()[ch-properties.Ch.Latin1InvertedExclam()]
+
+	}
+
+	if len([]rune(converted)) > 0 {
+		max_length = 1
 	}
 
 	return converted, max_length, nil
