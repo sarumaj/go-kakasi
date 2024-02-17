@@ -47,7 +47,7 @@ func (ch) Endmark() []rune {
 }
 
 func (ch) LongSymbols() []rune {
-	return []rune{'\u30FC', '\u2015', '\u2212', '\uFF70'}
+	return []rune{0x30FC, 0x2015, 0x2212, 0xFF70}
 }
 
 func (ch) UncheckedLongSymbols() []rune {
