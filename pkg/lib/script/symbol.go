@@ -41,6 +41,7 @@ func (s Symbol) convert_a(text string) (string, int, error) {
 	}
 
 	switch ch := []rune(text)[0]; {
+
 	case properties.Ch.IdeographicSpace() <= ch && ch <= properties.Ch.PostalMarkFace():
 		converted = properties.ConvertTables.SymbolTable1()[ch-properties.Ch.IdeographicSpace()]
 

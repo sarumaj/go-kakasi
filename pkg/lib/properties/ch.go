@@ -42,14 +42,24 @@ func (ch) ZenkakuNumberNine() rune        { return 0xFF1A }
 func (ch) ZenkakuA() rune                 { return 0xFF21 }
 func (ch) Zenkaku_a() rune                { return 0xFF41 }
 
-func (ch) Endmark() []rune {
-	return []rune{0x29, 0x5D, 0x21, 0x2C, 0x2E, 0x3001, 0x3002, 0xFF1F, 0xFF10, 0xFF1E, 0xFF1C}
+func (ch) isInRange(ch rune, runes []rune) bool {
+	for _, r := range runes {
+		if ch == r {
+			return true
+		}
+	}
+
+	return false
 }
 
-func (ch) LongSymbols() []rune {
-	return []rune{0x30FC, 0x2015, 0x2212, 0xFF70}
+func (c ch) IsEndmark(ch rune) bool {
+	return c.isInRange(ch, []rune{0x29, 0x5D, 0x21, 0x2C, 0x2E, 0x3001, 0x3002, 0xFF1F, 0xFF10, 0xFF1E, 0xFF1C})
 }
 
-func (ch) UncheckedLongSymbols() []rune {
-	return []rune{0x002D, 0x2010, 0x2011, 0x2013, 0x2014}
+func (c ch) IsLongSymbol(ch rune) bool {
+	return c.isInRange(ch, []rune{0x30FC, 0x2015, 0x2212, 0xFF70})
+}
+
+func (c ch) IsUncheckedLongSymbol(ch rune) bool {
+	return c.isInRange(ch, []rune{0x002D, 0x2010, 0x2011, 0x2013, 0x2014})
 }

@@ -142,7 +142,7 @@ func (k Kata) IsKatakanaOrExtended(ch rune) bool {
 	return false
 }
 
-func NewKata(mode mode, method method) (*Kata, error) {
+func NewKata(conf Conf) (*Kata, error) {
 	halfKanaDict, err := properties.Configurations.JisyoHalfkana()
 	if err != nil {
 		return nil, err
@@ -150,12 +150,12 @@ func NewKata(mode mode, method method) (*Kata, error) {
 
 	var kanaDict codegen.LookupMap
 
-	switch mode {
+	switch conf.Mode {
 
 	case Mode_a:
 		var err error
 
-		switch method {
+		switch conf.Method {
 
 		case MethodPassport:
 			kanaDict, err = properties.Configurations.JisyoPassport()
@@ -167,7 +167,7 @@ func NewKata(mode mode, method method) (*Kata, error) {
 			kanaDict, err = properties.Configurations.JisyoHepburn()
 
 		default:
-			return nil, fmt.Errorf("invalid method: %v", method)
+			return nil, fmt.Errorf("invalid method: %v", conf.Method)
 
 		}
 
@@ -178,13 +178,13 @@ func NewKata(mode mode, method method) (*Kata, error) {
 	case ModeH:
 
 	default:
-		return nil, fmt.Errorf("invalid mode: %v", mode)
+		return nil, fmt.Errorf("invalid mode: %v", conf.Mode)
 
 	}
 
 	return &Kata{
 		kana:         kana{kanaDict: kanaDict},
 		halfKanaDict: halfKanaDict,
-		mode:         mode,
+		mode:         conf.Mode,
 	}, nil
 }

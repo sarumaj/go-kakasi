@@ -68,15 +68,15 @@ func (Hira) IsHiraganaOrExtended(ch rune) bool {
 }
 
 // NewHira creates a new Hira instance.
-func NewHira(mode mode, method method) (*Hira, error) {
+func NewHira(conf Conf) (*Hira, error) {
 	var kanaDict codegen.LookupMap
 
-	switch mode {
+	switch conf.Mode {
 
 	case Mode_a:
 		var err error
 
-		switch method {
+		switch conf.Method {
 
 		case MethodHepburn:
 			kanaDict, err = properties.Configurations.JisyoHepburnHira()
@@ -88,7 +88,7 @@ func NewHira(mode mode, method method) (*Hira, error) {
 			kanaDict, err = properties.Configurations.JisyoPassportHira()
 
 		default:
-			return nil, fmt.Errorf("invalid method: %s", method)
+			return nil, fmt.Errorf("invalid method: %s", conf.Method)
 
 		}
 
@@ -99,12 +99,12 @@ func NewHira(mode mode, method method) (*Hira, error) {
 	case ModeK:
 
 	default:
-		return nil, fmt.Errorf("invalid mode: %s", mode)
+		return nil, fmt.Errorf("invalid mode: %s", conf.Mode)
 
 	}
 
 	return &Hira{
 		kana: kana{kanaDict: kanaDict},
-		mode: mode,
+		mode: conf.Mode,
 	}, nil
 }
