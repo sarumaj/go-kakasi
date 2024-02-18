@@ -25,6 +25,7 @@ func (t *Itaiji) Convert(s string) string {
 			replacements = append(replacements, string(k), "")
 			continue
 		}
+
 		replacements = append(replacements, string(k), *v)
 	}
 

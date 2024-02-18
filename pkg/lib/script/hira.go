@@ -9,8 +9,8 @@ import (
 // Hira is a type that represents a Japanese text converter.
 // It is used to convert Hiragana and Extended Kana characters to Katakana or Romaji characters.
 type Hira struct {
-	kana
-	mode mode
+	kanaDict codegen.LookupMap
+	mode     mode
 }
 
 // Convert converts Hiragana and Extended Kana characters to Katakana or Romaji characters.
@@ -19,21 +19,22 @@ func (h Hira) Convert(text string) (string, int, error) {
 	var max_length int
 	var err error
 
+	h2 := kana{kanaDict: h.kanaDict}
 	switch h.mode {
 
 	case Mode_a:
-		converted, max_length, err = h.convert_a(text)
+		converted, max_length, err = h2.convert_a(text)
 
 	case ModeK:
 		converted, max_length, err = h.convertK(text)
 
 	default:
-		converted, max_length, err = h.convertNoop(text)
+		converted, max_length, err = h2.convertNoop(text)
 
 	}
 
 	if err != nil {
-		return "", 0, fmt.Errorf("failed to convert text: %v", err)
+		return "", 0, err
 	}
 
 	return converted, max_length, nil
@@ -47,11 +48,11 @@ func (h Hira) convertK(text string) (string, int, error) {
 	for _, r := range text {
 		// character is a Hiragana or an Extended Kana character
 		if 0x3040 < r && r < 0x3097 {
-			converted += string(r - 0x30A1 + 0x3041)
+			converted += string(r + 0x30A1 - 0x3041)
 			max_length++
 
 		} else if 0x1B150 <= r && r <= 0x1B152 {
-			converted += string(r - 0x1B164 + 0x1B150)
+			converted += string(r + 0x1B164 - 0x1B150)
 			max_length++
 
 		}
@@ -61,8 +62,8 @@ func (h Hira) convertK(text string) (string, int, error) {
 
 }
 
-// IsHiraganaOrExtended returns true if the given character is a Hiragana or an Extended Kana character.
-func (Hira) IsHiraganaOrExtended(ch rune) bool {
+// IsRegion returns true if the given character is a Hiragana or an Extended Kana character.
+func (Hira) IsRegion(ch rune) bool {
 	return (0x3040 < ch && ch < 0x3097) || // Hiragana
 		(0x1B150 <= ch && ch <= 0x1B152) // Extended Kana
 }
@@ -104,7 +105,7 @@ func NewHira(conf Conf) (*Hira, error) {
 	}
 
 	return &Hira{
-		kana: kana{kanaDict: kanaDict},
-		mode: conf.Mode,
+		kanaDict: kanaDict,
+		mode:     conf.Mode,
 	}, nil
 }

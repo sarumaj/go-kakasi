@@ -15,10 +15,13 @@
     "Jisyo",
     "Kakasi",
     "kakasidict",
+    "kantan",
     "Kanwa",
     "kanwadict",
     "Kata",
     "kigou",
+    "kosei",
+    "kousei",
     "Kunrei",
     "kunreidict",
     "kunreihira",
@@ -26,6 +29,7 @@
     "maru",
     "masu",
     "mesu",
+    "ookii",
     "passportdict",
     "passporthira",
     "pilcrow",
@@ -34,9 +38,11 @@
     "Sessi",
     "setu",
     "sime",
+    "suki",
     "Tilda",
     "unidic",
     "unidict",
+    "VSCHR",
     "yomi",
     "Zenkaku"
   ],
@@ -47,6 +53,8 @@
     "øùúûüýþÿ",
     "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ",
     "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ",
-    "〱〲〳〴〵"
+    "абвгдеёжзийклмнопрстуфхцчшщъыьэюяѐё",
+    "〱〲〳〴〵",
+    "ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ"
   ]
 }

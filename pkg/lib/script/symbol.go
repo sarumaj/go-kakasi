@@ -6,7 +6,6 @@ import (
 )
 
 type Symbol struct {
-	kana
 	mode mode
 }
 
@@ -21,7 +20,7 @@ func (s Symbol) Convert(text string) (string, int, error) {
 		converted, max_length, err = s.convert_a(text)
 
 	default:
-		converted, max_length, err = s.convertNoop(text)
+		converted, max_length, err = kana{}.convertNoop(text)
 
 	}
 
@@ -43,16 +42,16 @@ func (s Symbol) convert_a(text string) (string, int, error) {
 	switch ch := []rune(text)[0]; {
 
 	case properties.Ch.IdeographicSpace() <= ch && ch <= properties.Ch.PostalMarkFace():
-		converted = properties.ConvertTables.SymbolTable1()[ch-properties.Ch.IdeographicSpace()]
+		converted = properties.ConvertTables.SymbolTable1()[ch]
 
 	case properties.Ch.WavyDash() <= ch && ch <= properties.Ch.IdeographicHalfFillSpace():
-		converted = properties.ConvertTables.SymbolTable2()[ch-properties.Ch.WavyDash()]
+		converted = properties.ConvertTables.SymbolTable2()[ch]
 
 	case properties.Ch.GreeceAlpha() <= ch && ch <= properties.Ch.GreeceOmega():
-		converted = properties.ConvertTables.SymbolTable3()[ch-properties.Ch.GreeceAlpha()]
+		converted = properties.ConvertTables.SymbolTable3()[ch]
 
 	case properties.Ch.Greece_alpha() <= ch && ch <= properties.Ch.Greece_omega():
-		converted = properties.ConvertTables.SymbolTable4()[ch-properties.Ch.Greece_alpha()]
+		converted = properties.ConvertTables.SymbolTable4()[ch]
 
 	case
 		properties.Ch.CyrillicA() <= ch && ch <= properties.Ch.Cyrillic_ya(),
@@ -62,7 +61,7 @@ func (s Symbol) convert_a(text string) (string, int, error) {
 		converted = properties.ConvertTables.CyrillicTable()[ch]
 
 	case properties.Ch.ZenkakuExcMark() <= ch && ch <= properties.Ch.ZenkakuSlashMark():
-		converted = properties.ConvertTables.SymbolTable5()[ch-properties.Ch.ZenkakuExcMark()]
+		converted = properties.ConvertTables.SymbolTable5()[ch]
 
 	case properties.Ch.ZenkakuNumberZero() <= ch && ch <= properties.Ch.ZenkakuNumberNine():
 		converted = string(ch - properties.Ch.ZenkakuNumberZero() + '0')
@@ -74,7 +73,7 @@ func (s Symbol) convert_a(text string) (string, int, error) {
 		converted = string(0x0061 + ch - 0xFF41) // convert full-width lowercase letters to half-width lowercase letters
 
 	case properties.Ch.Latin1InvertedExclam() <= ch && ch <= properties.Ch.Latin1YDiaeresis():
-		converted = properties.ConvertTables.Latin1Table()[ch-properties.Ch.Latin1InvertedExclam()]
+		converted = properties.ConvertTables.Latin1Table()[ch]
 
 	}
 
@@ -85,7 +84,7 @@ func (s Symbol) convert_a(text string) (string, int, error) {
 	return converted, max_length, nil
 }
 
-func (s Symbol) IsValidMultilingual(ch rune) bool {
+func (s Symbol) IsRegion(ch rune) bool {
 	switch {
 	case
 		properties.Ch.IdeographicSpace() <= ch && ch <= properties.Ch.PostalMarkFace(),
@@ -108,7 +107,6 @@ func (s Symbol) IsValidMultilingual(ch rune) bool {
 
 func NewSymbol(mode mode) *Symbol {
 	return &Symbol{
-		kana: kana{},
 		mode: mode,
 	}
 }

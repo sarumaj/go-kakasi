@@ -12,41 +12,88 @@ type convertTables struct{}
 // 　！＂＃＄％＆＇（）＊＋，－．／０１２３４５６７８９：；＜＝＞？＠
 // Ideographic space and punctuation
 func (c convertTables) AlphaTable1() map[rune]string {
-	m := map[rune]string{0x3000: "\u3000"}
-	for _, r := range c.generateSymbolTable(0xFF01, 0xFF20) {
-		m[r] = string(r)
+	return map[rune]string{
+		' ':  "\u3000",
+		'!':  "\uFF01",
+		'"':  "\uFF02",
+		'#':  "\uFF03",
+		'$':  "\uFF04",
+		'%':  "\uFF05",
+		'&':  "\uFF06",
+		'\'': "\uFF07",
+		'(':  "\uFF08",
+		')':  "\uFF09",
+		'*':  "\uFF0A",
+		'+':  "\uFF0B",
+		',':  "\uFF0C",
+		'-':  "\uFF0D",
+		'.':  "\uFF0E",
+		'/':  "\uFF0F",
+		'0':  "\uFF10",
+		'1':  "\uFF11",
+		'2':  "\uFF12",
+		'3':  "\uFF13",
+		'4':  "\uFF14",
+		'5':  "\uFF15",
+		'6':  "\uFF16",
+		'7':  "\uFF17",
+		'8':  "\uFF18",
+		'9':  "\uFF19",
+		':':  "\uFF1A",
+		';':  "\uFF1B",
+		'<':  "\uFF1C",
+		'=':  "\uFF1D",
+		'>':  "\uFF1E",
+		'?':  "\uFF1F",
+		'@':  "\uFF20",
 	}
-
-	return m
 }
 
 // Alpha2
 // ［＼］＾＿｀
 func (c convertTables) AlphaTable2() map[rune]string {
-	m := make(map[rune]string)
-	for _, r := range c.generateSymbolTable(0xFF3B, 0xFF40) {
-		m[r] = string(r)
+	return map[rune]string{
+		'[':  "\uFF3B",
+		'\\': "\uFF3C",
+		']':  "\uFF3D",
+		'^':  "\uFF3E",
+		'_':  "\uFF3F",
+		'`':  "\uFF40",
 	}
-
-	return m
 }
 
 // Alpha3
 // ｛｜｝～
 func (c convertTables) AlphaTable3() map[rune]string {
-	m := make(map[rune]string)
-	for _, r := range c.generateSymbolTable(0xFF5B, 0xFF5E) {
-		m[r] = string(r)
+	return map[rune]string{
+		'{': "\uFF5B",
+		'|': "\uFF5C",
+		'}': "\uFF5D",
+		'~': "\uFF5E",
 	}
-
-	return m
 }
 
 // Cyrillic
 // АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ
-// абвгдеёжзийклмнопрстуфхцчшщъыьэюя
+// абвгдеёжзийклмнопрстуфхцчшщъыьэюяѐё
 func (convertTables) CyrillicTable() map[rune]string {
 	return map[rune]string{
+		0x0400: "E",   // Ѐ
+		0x0401: "E",   // Ё
+		0x0402: "Dj",  // Ђ
+		0x0403: "G",   // Ѓ
+		0x0404: "E",   // Є
+		0x0405: "Dz",  // Ѕ
+		0x0406: "I",   // І
+		0x0407: "Yi",  // Ї
+		0x0408: "J",   // Ј
+		0x0409: "Lj",  // Љ
+		0x040A: "Nj",  // Њ
+		0x040B: "Tsh", // Ћ
+		0x040C: "Kj",  // Ќ
+		0x040D: "I",   // Ѝ
+		0x040E: "U",   // Ў
+		0x040F: "Dz",  // Џ
 		0x0410: "A",   // А
 		0x0411: "B",   // Б
 		0x0412: "V",   // В
@@ -114,15 +161,6 @@ func (convertTables) CyrillicTable() map[rune]string {
 		0x0450: "e",   // ѐ
 		0x0451: "e",   // ё
 	}
-}
-
-func (convertTables) generateSymbolTable(lo, hi int) []rune {
-	var out []rune
-	for i := lo; i <= hi; i++ {
-		out = append(out, rune(i))
-	}
-
-	return out
 }
 
 // Latin1
@@ -269,6 +307,7 @@ func (convertTables) SymbolTable1() map[rune]string {
 		0x301D: "(kigou)",
 		0x301E: "\"",
 		0x301F: "(kigou)",
+		0x3020: "(kigou)",
 	}
 }
 

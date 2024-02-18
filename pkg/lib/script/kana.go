@@ -26,14 +26,14 @@ func (k kana) convert_a(text string) (string, int, error) {
 		min_length = max_key_length
 	}
 
-	for i := 1; i < min_length; i++ {
-		if !k.kanaDict.Has(text[:i]) {
+	for i := 1; i <= min_length; i++ {
+		if !k.kanaDict.Has(string([]rune(text)[:i])) {
 			continue
 		}
 
 		if max_length < i {
 			max_length = i
-			converted = k.kanaDict.Get(text[:i])
+			converted = k.kanaDict.Get(string([]rune(text)[:i]))
 		}
 	}
 

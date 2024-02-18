@@ -13,7 +13,7 @@ func Generate(dst string) error {
 			return err
 		}
 
-		if err := dumpJSON(filepath.Join(dst, tgt), m, ""); err != nil {
+		if err := dumpJSON(filepath.Join(dst, tgt), m, "  "); err != nil {
 			return err
 		}
 	}
@@ -24,7 +24,7 @@ func Generate(dst string) error {
 			return err
 		}
 
-		if err := dumpJSON(filepath.Join(dst, tgt), m, ""); err != nil {
+		if err := dumpJSON(filepath.Join(dst, tgt), m, "  "); err != nil {
 			return err
 		}
 	}
@@ -35,7 +35,7 @@ func Generate(dst string) error {
 			return err
 		}
 
-		if err := dumpJSON(filepath.Join(dst, tgt), m, ""); err != nil {
+		if err := dumpJSON(filepath.Join(dst, tgt), m, "  "); err != nil {
 			return err
 		}
 	}

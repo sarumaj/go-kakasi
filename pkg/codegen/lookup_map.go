@@ -40,7 +40,7 @@ func (m LookupMap) MaxKeyLen() int {
 	l := 0
 	for k := range m {
 		if len([]rune(k)) > l {
-			l = len([]rune(k))
+			l = len(k)
 		}
 	}
 

@@ -9,7 +9,7 @@ import (
 // Kata is a type that represents a Japanese text converter.
 // It is used to convert Katakana and Extended Kana characters to Hiragana or Romaji characters.
 type Kata struct {
-	kana
+	kanaDict     codegen.LookupMap
 	halfKanaDict codegen.LookupMap
 	mode         mode
 }
@@ -19,16 +19,17 @@ func (k Kata) Convert(text string) (string, int, error) {
 	var max_length int
 	var err error
 
+	k2 := kana{kanaDict: k.kanaDict}
 	switch k.mode {
 
 	case Mode_a:
-		converted, max_length, err = k.convert_a(text)
+		converted, max_length, err = k2.convert_a(text)
 
 	case ModeH:
 		converted, max_length, err = k.convertH(text)
 
 	default:
-		converted, max_length, err = k.convertNoop(text)
+		converted, max_length, err = k2.convertNoop(text)
 
 	}
 
@@ -43,11 +44,13 @@ func (k Kata) convertH(text string) (string, int, error) {
 	var converted string
 	var max_length int
 
+	var diff rune = 0x30A1 - 0x3041
+	var eDiff rune = 0x1B164 - 0x1B150
 	for i := 0; i < len([]rune(text)); {
 		switch ch := []rune(text)[i]; {
 
 		case 0x1B164 <= ch && ch < 0x1B167:
-			converted += string(ch - 0x1B164 + 0x1B150)
+			converted += string(ch - eDiff)
 			max_length++
 			i++
 
@@ -57,7 +60,7 @@ func (k Kata) convertH(text string) (string, int, error) {
 			i++
 
 		case 0x30A0 < ch && ch < 0x30F7:
-			converted += string(ch - 0x30A1 + 0x3041)
+			converted += string(ch - diff)
 			max_length++
 			i++
 
@@ -67,7 +70,7 @@ func (k Kata) convertH(text string) (string, int, error) {
 			i++
 
 		case k.IsHalfWidthKana(ch):
-			kana_str, length, err := k.convertHalfKana(text[i:])
+			kana_str, length, err := k.convertHalfKana(string([]rune(text)[i:]))
 			if err != nil {
 				return "", 0, fmt.Errorf("failed to convert half kana: %v", err)
 			}
@@ -79,15 +82,20 @@ func (k Kata) convertH(text string) (string, int, error) {
 					converted += kana_str
 
 				} else {
-					converted += string([]rune(kana_str)[0] - 0x30A1 + 0x3041)
+					converted += string([]rune(kana_str)[0] - diff)
 
 				}
 
-			} else {
+			} else { // skip unknown character
 				max_length++
 				i++
 
 			}
+
+		default:
+			converted += string(ch)
+			max_length++
+			i++
 
 		}
 	}
@@ -97,24 +105,20 @@ func (k Kata) convertH(text string) (string, int, error) {
 
 func (k Kata) convertHalfKana(text string) (string, int, error) {
 	var converted string
-	var max_length int
+	var max_length int = -1
 
 	if k.halfKanaDict == nil {
 		return "", 0, fmt.Errorf("halfKanaDict is empty")
 	}
 
 	for _, i := range []int{2, 1} {
-		if i > len([]rune(text)) {
-			continue
-		}
-
-		if !k.halfKanaDict.Has(text[:i]) {
+		if i > len([]rune(text)) || !k.halfKanaDict.Has(string([]rune(text)[:i])) {
 			continue
 		}
 
 		if max_length < i {
 			max_length = i
-			converted = k.halfKanaDict.Get(text[:i])
+			converted = k.halfKanaDict.Get(string([]rune(text)[:i]))
 		}
 	}
 
@@ -129,7 +133,7 @@ func (Kata) IsKatakana(ch rune) bool {
 	return 0x30A0 < ch && ch < 0x30FD
 }
 
-func (k Kata) IsKatakanaOrExtended(ch rune) bool {
+func (k Kata) IsRegion(ch rune) bool {
 	switch {
 	case
 		k.IsKatakana(ch),
@@ -183,7 +187,7 @@ func NewKata(conf Conf) (*Kata, error) {
 	}
 
 	return &Kata{
-		kana:         kana{kanaDict: kanaDict},
+		kanaDict:     kanaDict,
 		halfKanaDict: halfKanaDict,
 		mode:         conf.Mode,
 	}, nil

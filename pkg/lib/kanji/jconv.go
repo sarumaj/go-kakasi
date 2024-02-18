@@ -41,7 +41,7 @@ func (j *JConv) Convert(iText, bText string) (string, int, error) {
 	// load the kanwa table for the first character of the input text
 	table := j.kanwa.Load([]rune(text)[0])
 	if table == nil {
-		return "", 0, fmt.Errorf("kanwa table is empty")
+		return "", 0, fmt.Errorf("no kanwa table found for the first character of the input text: %s", string([]rune(text[:1])))
 	}
 
 	// iterate through the kanwa table to find the longest matching key
@@ -49,7 +49,12 @@ func (j *JConv) Convert(iText, bText string) (string, int, error) {
 		key_length := len([]rune(k))
 
 		// if the key is longer than the input text, skip
-		if len([]rune(text)) < key_length || k != text[:key_length] {
+		switch {
+		case
+			len([]rune(text)) < key_length,
+			k != string([]rune(text)[:key_length]),
+			max_length >= key_length:
+
 			continue
 		}
 
@@ -85,7 +90,7 @@ func (j *JConv) Convert(iText, bText string) (string, int, error) {
 			// if the last character of the input text is an ideograph
 			max_length < num_changed_ch+len([]rune(text)) &&
 				max_length >= len([]rune(iText)) &&
-				j.IsCustomOrVariantCharacter([]rune(iText)[max_length]):
+				j.IsVSCHR([]rune(iText)[max_length]):
 
 			max_length++
 		}
@@ -95,19 +100,19 @@ func (j *JConv) Convert(iText, bText string) (string, int, error) {
 	return converted, max_length, nil
 }
 
-// IsClassifiedHiragana returns true if the character is a classified hiragana.
-func (j *JConv) IsClassifiedHiragana(ch rune) bool {
+// IsCLetter returns true if the character is a classified hiragana.
+func (j *JConv) IsCLetter(ch rune) bool {
 	_, ok := codegen.CLetters[ch-0x3040]
 	return 0x3041 <= ch && ch <= 0x309F && !ok
 }
 
-// IsCustomOrVariantCharacter returns true if the character is a custom or variant character.
-func (j *JConv) IsCustomOrVariantCharacter(ch rune) bool {
+// IsVSCHR returns true if the character is a custom or variant character.
+func (j *JConv) IsVSCHR(ch rune) bool {
 	return 0x0E0100 <= ch && ch <= 0x0E01EF || 0xFE00 <= ch && ch <= 0xFE0F
 }
 
-// IsIdeograph returns true if the character is an ideograph.
-func (j *JConv) IsIdeograph(ch rune) bool {
+// IsRegion returns true if the character is an ideograph.
+func (j *JConv) IsRegion(ch rune) bool {
 	return 0x3400 <= ch && ch <= 0xE000 || j.itaiji.HasKey(ch)
 }
 

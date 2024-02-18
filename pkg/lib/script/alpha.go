@@ -43,19 +43,19 @@ func (a Alpha) convertE(text string) (string, int, error) {
 	switch ch := []rune(text)[0]; {
 
 	case properties.Ch.Space() <= ch && ch <= properties.Ch.AtMark():
-		converted = properties.ConvertTables.AlphaTable1()[ch-properties.Ch.Space()]
+		converted = properties.ConvertTables.AlphaTable1()[ch]
 
 	case properties.Ch.AlphabetA() <= ch && ch <= properties.Ch.AlphabetZ():
 		converted = string(properties.Ch.ZenkakuA() + ch - properties.Ch.AlphabetA())
 
 	case properties.Ch.SquareBra() <= ch && ch <= properties.Ch.BackQuote():
-		converted = properties.ConvertTables.AlphaTable2()[ch-properties.Ch.SquareBra()]
+		converted = properties.ConvertTables.AlphaTable2()[ch]
 
 	case properties.Ch.Alphabet_a() <= ch && ch <= properties.Ch.Alphabet_z():
 		converted = string(properties.Ch.Zenkaku_a() + ch - properties.Ch.Alphabet_a())
 
 	case properties.Ch.BracketBra() <= ch && ch <= properties.Ch.Tilda():
-		converted = properties.ConvertTables.AlphaTable3()[ch-properties.Ch.BracketBra()]
+		converted = properties.ConvertTables.AlphaTable3()[ch]
 
 	}
 
