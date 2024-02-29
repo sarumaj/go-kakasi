@@ -1,6 +1,7 @@
 package script
 
 import (
+	"fmt"
 	"github/sarumaj/go-kakasi/pkg/lib/properties"
 
 	lru "github.com/hashicorp/golang-lru/v2"
@@ -73,6 +74,7 @@ func (c IConv) Convert(text, hira string) (*IConverted, error) {
 		return cached, nil
 	}
 
+	fmt.Printf("before text: %s, hira: %s\n", text, hira)
 	kana, err := c.convert(hira, c.h2kConv)
 	if err != nil {
 		return nil, err
@@ -82,6 +84,7 @@ func (c IConv) Convert(text, hira string) (*IConverted, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("after text: %s, hira: %s\n", text, hira)
 
 	result := IConverted{Orig: text, Hira: hira, Kana: kana}
 	result.Hepburn, err = c.convert(hira, c.h2ahConv)
@@ -113,6 +116,8 @@ func (c IConv) Convert(text, hira string) (*IConverted, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Printf("result: %v\n", result)
 
 	_ = c.cache.Add(text+":"+hira, &result)
 	return &result, nil

@@ -83,20 +83,23 @@ func (m KanwaMap) Set(k rune, v KanjiCtxMap) { m = mapSet(m, k, v) }
 // The yomi is the reading of the kanji character or phrase.
 // The kanji is the kanji character or phrase.
 func (m KanwaMap) parseLine(line string) {
-	token := strings.Split(line, " ")
-	yomi, kanji := token[0], token[1]
+	tokens := strings.Split(line, " ")
+	if len(tokens) < 2 {
+		return
+	}
 
+	yomi, kanji := tokens[0], tokens[1]
 	yomi_runes := []rune(yomi)
 
 	var tail []rune
 	if yomi_runes[len(yomi_runes)-1] <= 'z' {
-		tail = yomi_runes[len(yomi_runes)-1:]
+		tail = append(yomi_runes, yomi_runes[len(yomi_runes)-1])
 		yomi_runes = yomi_runes[: len(yomi_runes)-1 : len(yomi_runes)-1]
 	}
 
 	var token_ctx []string
-	if len(token) > 2 {
-		token_ctx = token[2:]
+	if len(tokens) > 2 {
+		token_ctx = tokens[2:]
 	}
 
 	m.update(kanji, string(yomi_runes), string(tail), token_ctx...)

@@ -20,6 +20,10 @@ func (k Kakasi) Convert(text string) ([]script.IConverted, error) {
 		return nil, fmt.Errorf("input text is empty")
 	}
 
+	if len([]rune(text)) == 0 {
+		return []script.IConverted{{}}, nil
+	}
+
 	var originalText, kanaText string
 	var results []script.IConverted
 	var fBuffer bool // output buffer flag
@@ -58,13 +62,13 @@ func (k Kakasi) Convert(text string) ([]script.IConverted, error) {
 			t = chKanji
 
 			if length > 0 {
-				originalText += string([]rune(text)[i : i+length])
+				originalText = string([]rune(text)[i : i+length])
 				kanaText = converted
 				i += length
 				fBuffer, fText, fCpInc = false, false, false
 
 			} else { // unknown kanji
-				originalText += string([]rune(text)[i])
+				originalText = string([]rune(text)[i])
 				kanaText = ""
 				i++
 				fBuffer, fText, fCpInc = true, false, false
@@ -137,6 +141,8 @@ func (k Kakasi) Convert(text string) ([]script.IConverted, error) {
 			results = append(results, *result)
 		}
 	}
+
+	fmt.Printf("results: %v\n", results)
 
 	return results, nil
 }

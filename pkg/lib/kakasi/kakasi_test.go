@@ -14,9 +14,10 @@ func TestKakasi(t *testing.T) {
 		args string
 		want []script.IConverted
 	}{
+		//{"", []script.IConverted{{}}},
 		{"構成", []script.IConverted{{Orig: "構成", Hira: "こうせい", Kana: "コウセイ", Hepburn: "kousei", Kunrei: "kousei", Passport: "kosei"}}},
 		{"好き", []script.IConverted{{Orig: "好き", Hira: "すき", Kana: "スキ", Hepburn: "suki", Kunrei: "suki", Passport: "suki"}}},
-		//{"大きい", []script.IConverted{{Orig: "大きい", Hira: "おおきい", Kana: "オオキイ", Hepburn: "ookii", Kunrei: "ookii"}}},
+		{"大きい", []script.IConverted{{Orig: "大きい", Hira: "おおきい", Kana: "オオキイ", Hepburn: "ookii", Kunrei: "ookii"}}},
 		{"かんたん", []script.IConverted{{Orig: "かんたん", Hira: "かんたん", Kana: "カンタン", Hepburn: "kantan", Kunrei: "kantan", Passport: "kantan"}}},
 		{"にゃ", []script.IConverted{{Orig: "にゃ", Hira: "にゃ", Kana: "ニャ", Hepburn: "nya", Kunrei: "nya", Passport: "nya"}}},
 		{"っき", []script.IConverted{{Orig: "っき", Hira: "っき", Kana: "ッキ", Hepburn: "kki", Kunrei: "kki", Passport: "kki"}}},
@@ -27,7 +28,7 @@ func TestKakasi(t *testing.T) {
 		{"漢字とひらがな交じり文", []script.IConverted{
 			{Orig: "漢字", Hira: "かんじ", Kana: "カンジ", Hepburn: "kanji", Kunrei: "kanzi", Passport: "kanji"},
 			{Orig: "とひらがな", Hira: "とひらがな", Kana: "トヒラガナ", Hepburn: "tohiragana", Kunrei: "tohiragana", Passport: "tohiragana"},
-			{Orig: "交じり文", Hira: "まじり", Kana: "マジリ", Hepburn: "majiri", Kunrei: "maziri", Passport: "majiri"},
+			{Orig: "交じり", Hira: "まじり", Kana: "マジリ", Hepburn: "majiri", Kunrei: "maziri", Passport: "majiri"},
 			{Orig: "文", Hira: "ぶん", Kana: "ブン", Hepburn: "bun", Kunrei: "bun", Passport: "bun"},
 		}},
 	} {
