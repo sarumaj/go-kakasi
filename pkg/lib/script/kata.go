@@ -9,8 +9,8 @@ import (
 // Kata is a type that represents a Japanese text converter.
 // It is used to convert Katakana and Extended Kana characters to Hiragana or Romaji characters.
 type Kata struct {
-	kanaDict     codegen.LookupMap
-	halfKanaDict codegen.LookupMap
+	kanaDict     *codegen.LookupMap
+	halfKanaDict *codegen.LookupMap
 	mode         mode
 }
 
@@ -46,7 +46,9 @@ func (k Kata) convertH(text string) (string, int, error) {
 
 	var diff rune = 0x30A1 - 0x3041
 	var eDiff rune = 0x1B164 - 0x1B150
+
 	for i := 0; i < len([]rune(text)); {
+		var abort bool
 		switch ch := []rune(text)[i]; {
 
 		case 0x1B164 <= ch && ch < 0x1B167:
@@ -93,10 +95,12 @@ func (k Kata) convertH(text string) (string, int, error) {
 			}
 
 		default:
-			converted += string(ch)
-			max_length++
-			i++
+			abort = true
 
+		}
+
+		if abort {
+			break
 		}
 	}
 
@@ -152,7 +156,7 @@ func NewKata(conf Conf) (*Kata, error) {
 		return nil, err
 	}
 
-	var kanaDict codegen.LookupMap
+	var kanaDict *codegen.LookupMap
 
 	switch conf.Mode {
 

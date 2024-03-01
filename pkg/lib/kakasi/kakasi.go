@@ -1,7 +1,6 @@
 package kakasi
 
 import (
-	"fmt"
 	"github/sarumaj/go-kakasi/pkg/lib/kanji"
 	"github/sarumaj/go-kakasi/pkg/lib/properties"
 	"github/sarumaj/go-kakasi/pkg/lib/script"
@@ -16,10 +15,6 @@ type Kakasi struct {
 }
 
 func (k Kakasi) Convert(text string) ([]script.IConverted, error) {
-	if len([]rune(text)) == 0 {
-		return nil, fmt.Errorf("input text is empty")
-	}
-
 	if len([]rune(text)) == 0 {
 		return []script.IConverted{{}}, nil
 	}
@@ -141,8 +136,6 @@ func (k Kakasi) Convert(text string) ([]script.IConverted, error) {
 			results = append(results, *result)
 		}
 	}
-
-	fmt.Printf("results: %v\n", results)
 
 	return results, nil
 }

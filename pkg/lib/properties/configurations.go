@@ -34,83 +34,83 @@ func (configurations) decode(path string, v any) error {
 	return json.NewDecoder(f).Decode(v)
 }
 
-func (c configurations) JisyoHalfkana() (codegen.LookupMap, error) {
+func (c configurations) JisyoHalfkana() (*codegen.LookupMap, error) {
 	var v codegen.LookupMap
 	if err := c.decode(c.jisyoHalfkana(), &v); err != nil {
 		return nil, err
 	}
 
-	return v, nil
+	return &v, nil
 }
 
-func (c configurations) JisyoHepburn() (codegen.LookupMap, error) {
+func (c configurations) JisyoHepburn() (*codegen.LookupMap, error) {
 	var v codegen.LookupMap
 	if err := c.decode(c.jisyoHepburn(), &v); err != nil {
 		return nil, err
 	}
 
-	return v, nil
+	return &v, nil
 }
 
-func (c configurations) JisyoHepburnHira() (codegen.LookupMap, error) {
+func (c configurations) JisyoHepburnHira() (*codegen.LookupMap, error) {
 	var v codegen.LookupMap
 	if err := c.decode(c.jisyoHepburnHira(), &v); err != nil {
 		return nil, err
 	}
 
-	return v, nil
+	return &v, nil
 }
 
-func (c configurations) JisyoItaiji() (codegen.TransTable, error) {
+func (c configurations) JisyoItaiji() (*codegen.TransTable, error) {
 	var v codegen.TransTable
 	if err := c.decode(c.jisyoItaiji(), &v); err != nil {
 		return nil, err
 	}
 
-	return v, nil
+	return &v, nil
 }
 
-func (c configurations) JisyoKanwa() (codegen.KanwaMap, error) {
+func (c configurations) JisyoKanwa() (*codegen.KanwaMap, error) {
 	var v codegen.KanwaMap
 	if err := c.decode(c.jisyoKanwa(), &v); err != nil {
 		return nil, err
 	}
 
-	return v, nil
+	return &v, nil
 }
 
-func (c configurations) JisyoKunrei() (codegen.LookupMap, error) {
+func (c configurations) JisyoKunrei() (*codegen.LookupMap, error) {
 	var v codegen.LookupMap
 	if err := c.decode(c.jisyoKunrei(), &v); err != nil {
 		return nil, err
 	}
 
-	return v, nil
+	return &v, nil
 }
 
-func (c configurations) JisyoKunreiHira() (codegen.LookupMap, error) {
+func (c configurations) JisyoKunreiHira() (*codegen.LookupMap, error) {
 	var v codegen.LookupMap
 	if err := c.decode(c.jisyoKunreiHira(), &v); err != nil {
 		return nil, err
 	}
 
-	return v, nil
+	return &v, nil
 }
 
-func (c configurations) JisyoPassport() (codegen.LookupMap, error) {
+func (c configurations) JisyoPassport() (*codegen.LookupMap, error) {
 	var v codegen.LookupMap
 	if err := c.decode(c.jisyoPassport(), &v); err != nil {
 		return nil, err
 	}
 
-	return v, nil
+	return &v, nil
 }
 
-func (c configurations) JisyoPassportHira() (codegen.LookupMap, error) {
+func (c configurations) JisyoPassportHira() (*codegen.LookupMap, error) {
 	var v codegen.LookupMap
 	if err := c.decode(c.jisyoPassportHira(), &v); err != nil {
 		return nil, err
 	}
 
-	return v, nil
+	return &v, nil
 }

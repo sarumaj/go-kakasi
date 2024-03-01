@@ -9,7 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/goccy/go-json"
+	json "github.com/goccy/go-json"
+	ordered "github.com/wk8/go-ordered-map/v2"
 )
 
 // decodeEscapes decodes escape sequences in a string.
@@ -92,30 +93,51 @@ func dumpJSON(dst string, v any, indent string) error {
 }
 
 // mapGet gets a value from a map.
-func mapGet[K comparable, T any](m map[K]T, k K) T {
-	return m[k]
+func mapGet[K comparable, T any](m ordered.OrderedMap[K, T], k K) T {
+	return m.Value(k)
 }
 
 // mapHas checks if a map has a key.
-func mapHas[K comparable, T any](m map[K]T, k K) bool {
-	_, ok := m[k]
+func mapHas[K comparable, T any](m ordered.OrderedMap[K, T], k K) bool {
+	_, ok := m.Get(k)
 	return ok
 }
 
 // mapKeys returns the keys of a map.
-func mapKeys[K comparable, T any](m map[K]T) []K {
-	keys := make([]K, 0, len(m))
-	for k := range m {
-		keys = append(keys, k)
+func mapKeys[K comparable, T any](m ordered.OrderedMap[K, T]) []K {
+	keys := make([]K, 0, m.Len())
+	for p := m.Oldest(); p != nil; p = p.Next() {
+		keys = append(keys, p.Key)
+
 	}
 
 	return keys
 }
 
+// mapLen returns the length of a map.
+func mapLen[K comparable, T any](m ordered.OrderedMap[K, T]) int {
+	return m.Len()
+}
+
 // mapSet sets a value in a map.
-func mapSet[K comparable, T any](m map[K]T, k K, v T) map[K]T {
-	m[k] = v
+func mapSet[K comparable, T any](m *ordered.OrderedMap[K, T], k K, v T) *ordered.OrderedMap[K, T] {
+	_, _ = m.Set(k, v)
 	return m
+}
+
+// mapIter returns an iterator for a map.
+func mapIter[K comparable, V any](m ordered.OrderedMap[K, V]) func() (K, V, bool) {
+	var current *ordered.Pair[K, V] = m.Oldest()
+	return func() (K, V, bool) {
+		if current == nil {
+			var zeroK K
+			var zeroV V
+			return zeroK, zeroV, false
+		}
+
+		defer func() { current = current.Next() }()
+		return current.Key, current.Value, true
+	}
 }
 
 // traverseFile reads a file line by line and sends each line to a channel.

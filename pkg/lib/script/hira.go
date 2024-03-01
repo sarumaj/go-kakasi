@@ -9,7 +9,7 @@ import (
 // Hira is a type that represents a Japanese text converter.
 // It is used to convert Hiragana and Extended Kana characters to Katakana or Romaji characters.
 type Hira struct {
-	kanaDict codegen.LookupMap
+	kanaDict *codegen.LookupMap
 	mode     mode
 }
 
@@ -45,16 +45,28 @@ func (h Hira) convertK(text string) (string, int, error) {
 	var converted string
 	var max_length int
 
+	var diff rune = 0x30A1 - 0x3041
+	var eDiff rune = 0x1B164 - 0x1B150
+
 	for _, r := range text {
+		var abort bool
 		// character is a Hiragana or an Extended Kana character
-		if 0x3040 < r && r < 0x3097 {
-			converted += string(r + 0x30A1 - 0x3041)
+		switch {
+		case 0x3040 < r && r < 0x3097:
+			converted += string(r + diff)
 			max_length++
 
-		} else if 0x1B150 <= r && r <= 0x1B152 {
-			converted += string(r + 0x1B164 - 0x1B150)
+		case 0x1B150 <= r && r <= 0x1B152:
+			converted += string(r + eDiff)
 			max_length++
 
+		default:
+			abort = true
+
+		}
+
+		if abort {
+			break
 		}
 	}
 
@@ -70,7 +82,7 @@ func (Hira) IsRegion(ch rune) bool {
 
 // NewHira creates a new Hira instance.
 func NewHira(conf Conf) (*Hira, error) {
-	var kanaDict codegen.LookupMap
+	var kanaDict *codegen.LookupMap
 
 	switch conf.Mode {
 

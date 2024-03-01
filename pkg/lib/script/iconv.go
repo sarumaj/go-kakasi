@@ -3,6 +3,8 @@ package script
 import (
 	"fmt"
 	"github/sarumaj/go-kakasi/pkg/lib/properties"
+	"reflect"
+	"strings"
 
 	lru "github.com/hashicorp/golang-lru/v2"
 )
@@ -17,20 +19,9 @@ type IConv struct {
 	s2aConv  *Symbol
 }
 
-type IConverted struct {
-	Orig     string `json:"orig"`
-	Hira     string `json:"hira"`
-	Kana     string `json:"kana"`
-	Hepburn  string `json:"hepburn"`
-	Kunrei   string `json:"kunrei"`
-	Passport string `json:"passport"`
-}
-
-type IConvI interface {
+func (c IConv) convert(text string, convert interface {
 	Convert(string) (string, int, error)
-}
-
-func (c IConv) convert(text string, convert IConvI) (string, error) {
+}) (string, error) {
 	var converted string
 
 	for i := 0; i < len([]rune(text)); {
@@ -50,8 +41,8 @@ func (c IConv) convert(text string, convert IConvI) (string, error) {
 			i += length
 
 		case isSymbol && properties.Ch.IsLongSymbol([]rune(text)[i]):
-			if len([]rune(result)) > 0 {
-				converted += string([]rune(result)[len([]rune(result))-1])
+			if len([]rune(converted)) > 0 {
+				converted += string([]rune(converted)[len([]rune(converted))-1])
 			} else {
 				converted += "-"
 			}
@@ -74,7 +65,6 @@ func (c IConv) Convert(text, hira string) (*IConverted, error) {
 		return cached, nil
 	}
 
-	fmt.Printf("before text: %s, hira: %s\n", text, hira)
 	kana, err := c.convert(hira, c.h2kConv)
 	if err != nil {
 		return nil, err
@@ -84,7 +74,6 @@ func (c IConv) Convert(text, hira string) (*IConverted, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("after text: %s, hira: %s\n", text, hira)
 
 	result := IConverted{Orig: text, Hira: hira, Kana: kana}
 	result.Hepburn, err = c.convert(hira, c.h2ahConv)
@@ -117,13 +106,30 @@ func (c IConv) Convert(text, hira string) (*IConverted, error) {
 		return nil, err
 	}
 
-	fmt.Printf("result: %v\n", result)
-
 	_ = c.cache.Add(text+":"+hira, &result)
 	return &result, nil
 }
 
 func (IConv) maxLen() int { return 32 }
+
+type IConverted struct {
+	Orig     string `json:"orig"`
+	Hira     string `json:"hira"`
+	Kana     string `json:"kana"`
+	Hepburn  string `json:"hepburn"`
+	Kunrei   string `json:"kunrei"`
+	Passport string `json:"passport"`
+}
+
+func (i IConverted) String() string {
+	var out []string
+	v := reflect.Indirect(reflect.ValueOf(&i))
+	for i := 0; i < v.NumField(); i++ {
+		out = append(out, fmt.Sprintf("%s: %q", v.Type().Field(i).Name, v.Field(i).String()))
+	}
+
+	return fmt.Sprintf("{%s}", strings.Join(out, ", "))
+}
 
 func NewIConv() (*IConv, error) {
 	c := IConv{}

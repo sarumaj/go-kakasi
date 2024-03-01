@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	ordered "github.com/wk8/go-ordered-map/v2"
 )
 
 // LookupMapResources is a map of target and source files.
@@ -21,12 +23,21 @@ var lookupMapResources = map[string]string{
 
 // LookupMap is a lookup table.
 // It maps a string to a string.
-type LookupMap map[string]string
+type LookupMap ordered.OrderedMap[string, string]
 
-func (m LookupMap) Get(k string) string { return mapGet(m, k) }
-func (m LookupMap) Has(k string) bool   { return mapHas(m, k) }
-func (m LookupMap) Keys() []string      { return mapKeys(m) }
-func (m LookupMap) Set(k, v string)     { m = mapSet(m, k, v) }
+func (m LookupMap) Get(k string) string { return mapGet(ordered.OrderedMap[string, string](m), k) }
+func (m LookupMap) Has(k string) bool   { return mapHas(ordered.OrderedMap[string, string](m), k) }
+
+func (m LookupMap) Iter() func() (string, string, bool) {
+	return mapIter(ordered.OrderedMap[string, string](m))
+}
+
+func (m LookupMap) Keys() []string { return mapKeys(ordered.OrderedMap[string, string](m)) }
+func (m LookupMap) Len() int       { return mapLen(ordered.OrderedMap[string, string](m)) }
+
+func (m LookupMap) MarshalJSON() ([]byte, error) {
+	return (*ordered.OrderedMap[string, string])(&m).MarshalJSON()
+}
 
 // MaxKeyLen returns the length of the longest key in the map.
 func (m LookupMap) MaxKeyLen() int {
@@ -37,20 +48,28 @@ func (m LookupMap) MaxKeyLen() int {
 		}
 	}
 
-	l := 0
-	for k := range m {
-		if len([]rune(k)) > l {
-			l = len(k)
+	l, o := 0, ordered.OrderedMap[string, string](m)
+	for p := o.Oldest(); p != nil; p = p.Next() {
+		if len([]rune(p.Key)) > l {
+			l = len(p.Key)
 		}
 	}
 
 	return l
 }
 
+func (m *LookupMap) Set(k, v string) *LookupMap {
+	return (*LookupMap)(mapSet((*ordered.OrderedMap[string, string])(m), k, v))
+}
+
+func (m *LookupMap) UnmarshalJSON(data []byte) error {
+	return (*ordered.OrderedMap[string, string])(m).UnmarshalJSON(data)
+}
+
 // makeLookupMap creates a lookup table from a source file and writes it to a destination file.
 // It returns the lookup table and an error if any.
 // The source file is expected to have lines in the format "value key".
-func makeLookupMap(src string) (LookupMap, error) {
+func makeLookupMap(src string) (*LookupMap, error) {
 	if err := verifyLookupMapSource(src); err != nil {
 		return nil, err
 	}
@@ -65,7 +84,7 @@ func makeLookupMap(src string) (LookupMap, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	m := make(LookupMap)
+	m := (*LookupMap)(ordered.New[string, string]())
 	for line := range traverseFile(ctx, f) {
 		v, k, _ := strings.Cut(line, " ")
 		m.Set(k, v)

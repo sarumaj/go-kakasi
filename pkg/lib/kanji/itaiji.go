@@ -11,7 +11,7 @@ import (
 // It is used to convert Itaiji characters to their original form.
 type Itaiji struct {
 	sync.Mutex
-	table codegen.TransTable
+	table *codegen.TransTable
 }
 
 // Convert converts Itaiji characters to their original form.
@@ -20,7 +20,8 @@ func (t *Itaiji) Convert(s string) string {
 	defer t.Unlock()
 
 	var replacements []string
-	for k, v := range t.table {
+	iterator := t.table.Iter()
+	for k, v, ok := iterator(); ok; k, v, ok = iterator() {
 		if v == nil {
 			replacements = append(replacements, string(k), "")
 			continue

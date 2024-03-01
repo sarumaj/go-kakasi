@@ -45,33 +45,24 @@ func (j *JConv) Convert(iText, bText string) (string, int, error) {
 	}
 
 	// iterate through the kanwa table to find the longest matching key
-	for k, v := range table {
+	iterator := table.Iter()
+	for k, vs, ok := iterator(); ok; k, vs, ok = iterator() {
 		key_length := len([]rune(k))
 
 		// if the key is longer than the input text, skip
 		switch {
 		case
 			len([]rune(text)) < key_length,
-			k != string([]rune(text)[:key_length]),
-			max_length >= key_length:
+			k != string([]rune(text)[:key_length]):
 
 			continue
 		}
 
-		// retrieve the yomi and context of the key
-		yomi, ctx := v.GetYomi(), v.GetCtx()
-		if ctx == nil {
-			converted = yomi
-			max_length = key_length
-			continue
-		}
-
-		// match the context of the key with the input text
-		for _, c := range ctx {
-			if c == bText {
-				converted = yomi
+		for _, v := range vs {
+			// retrieve the yomi and context of the key
+			if (len(v.Ctx) == 0 || v.Ctx.Contains(bText)) && max_length < key_length {
+				converted = v.Yomi
 				max_length = key_length
-				break
 			}
 		}
 	}

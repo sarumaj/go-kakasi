@@ -2,9 +2,12 @@ package codegen
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
+
+	ordered "github.com/wk8/go-ordered-map/v2"
 )
 
 // CLetters is a map of runes to a list of strings.
@@ -46,37 +49,108 @@ var kanwaMapResources = map[string][]string{
 	},
 }
 
-// KanjiCtx is a kanji character or a phrase in the Japanese language.
+// KanjiCtx is a list of contexts in which a kanji character or phrase is used.
+type KanjiCtx []string
+
+func (m *KanjiCtx) Append(v ...string) *KanjiCtx {
+	*m = append(*m, v...)
+	return m
+}
+
+func (m KanjiCtx) Contains(v string) bool {
+	for _, ctx := range m {
+		if ctx == v {
+			return true
+		}
+	}
+
+	return false
+}
+
+// KanjiCtxPair is a kanji character or a phrase in the Japanese language.
 // It has a yomi and a list of contexts.
 // yomi is the reading of the kanji character or phrase.
 // ctx is a list of contexts in which the kanji character or phrase is used.
-type KanjiCtx [2]any
+type KanjiCtxPair struct {
+	Yomi string   `json:"yomi"`
+	Ctx  KanjiCtx `json:"ctx"`
+}
 
-func (m KanjiCtx) AppendCtx(v ...string) { r, _ := m[1].([]string); m[1] = append(r, v...) }
-func (m KanjiCtx) GetCtx() []string      { r, _ := m[1].([]string); return r }
-func (m KanjiCtx) GetYomi() string       { r, _ := m[0].(string); return r }
-func (m *KanjiCtx) SetCtx(v []string)    { m[1] = v }
-func (m *KanjiCtx) SetYomi(v string)     { m[0] = v }
+func (m *KanjiCtxPair) SetCtx(v KanjiCtx) *KanjiCtxPair { m.Ctx = v; return m }
+func (m *KanjiCtxPair) SetYomi(v string) *KanjiCtxPair  { m.Yomi = v; return m }
+
+func (m KanjiCtxPair) MarshalJSON() ([]byte, error) {
+	return json.Marshal([2]any{m.Yomi, m.Ctx})
+}
+
+func (m *KanjiCtxPair) UnmarshalJSON(data []byte) error {
+	var a [2]any
+	if err := json.Unmarshal(data, &a); err != nil {
+		return err
+	}
+
+	m.Yomi, _ = a[0].(string)
+	ctx, _ := a[1].([]any)
+	for _, c := range ctx {
+		m.Ctx = append(m.Ctx, fmt.Sprint(c))
+	}
+	return nil
+}
 
 // KanjiCtxMap is a map of strings to KanjiCtx.
 // It is used to generate the kanwa map.
 // Each string represents a kanji character.
-type KanjiCtxMap map[string]KanjiCtx
+type KanjiCtxMap ordered.OrderedMap[string, []KanjiCtxPair]
 
-func (m KanjiCtxMap) Get(k string) KanjiCtx    { return mapGet(m, k) }
-func (m KanjiCtxMap) Has(k string) bool        { return mapHas(m, k) }
-func (m KanjiCtxMap) Keys() []string           { return mapKeys(m) }
-func (m KanjiCtxMap) Set(k string, v KanjiCtx) { m = mapSet(m, k, v) }
+func (m *KanjiCtxMap) Append(k string, v ...KanjiCtxPair) *KanjiCtxMap {
+	return m.Set(k, append(m.Get(k), v...))
+}
+
+func (m KanjiCtxMap) Get(k string) []KanjiCtxPair {
+	return mapGet(ordered.OrderedMap[string, []KanjiCtxPair](m), k)
+}
+
+func (m KanjiCtxMap) Has(k string) bool {
+	return mapHas(ordered.OrderedMap[string, []KanjiCtxPair](m), k)
+}
+
+func (m KanjiCtxMap) Iter() func() (string, []KanjiCtxPair, bool) {
+	return mapIter(ordered.OrderedMap[string, []KanjiCtxPair](m))
+}
+
+func (m KanjiCtxMap) Keys() []string { return mapKeys(ordered.OrderedMap[string, []KanjiCtxPair](m)) }
+func (m KanjiCtxMap) Len() int       { return mapLen(ordered.OrderedMap[string, []KanjiCtxPair](m)) }
+
+func (m KanjiCtxMap) MarshalJSON() ([]byte, error) {
+	return (*ordered.OrderedMap[string, []KanjiCtxPair])(&m).MarshalJSON()
+}
+
+func (m *KanjiCtxMap) Set(k string, v []KanjiCtxPair) *KanjiCtxMap {
+	return (*KanjiCtxMap)(mapSet((*ordered.OrderedMap[string, []KanjiCtxPair])(m), k, v))
+}
+
+func (m *KanjiCtxMap) UnmarshalJSON(data []byte) error {
+	return (*ordered.OrderedMap[string, []KanjiCtxPair])(m).UnmarshalJSON(data)
+}
 
 // KanwaMap is a map of runes to a map of strings to KanjiCtx.
 // It is used to generate the kanwa map.
 // Each rune represents a beginning of a kanji character or a phrase in the Japanese language.
-type KanwaMap map[rune]KanjiCtxMap
+type KanwaMap ordered.OrderedMap[rune, KanjiCtxMap]
 
-func (m KanwaMap) Get(k rune) KanjiCtxMap    { return mapGet(m, k) }
-func (m KanwaMap) Has(k rune) bool           { return mapHas(m, k) }
-func (m KanwaMap) Keys() []rune              { return mapKeys(m) }
-func (m KanwaMap) Set(k rune, v KanjiCtxMap) { m = mapSet(m, k, v) }
+func (m KanwaMap) Get(k rune) KanjiCtxMap { return mapGet(ordered.OrderedMap[rune, KanjiCtxMap](m), k) }
+func (m KanwaMap) Has(k rune) bool        { return mapHas(ordered.OrderedMap[rune, KanjiCtxMap](m), k) }
+
+func (m KanwaMap) Iter() func() (rune, KanjiCtxMap, bool) {
+	return mapIter(ordered.OrderedMap[rune, KanjiCtxMap](m))
+}
+
+func (m KanwaMap) Keys() []rune { return mapKeys(ordered.OrderedMap[rune, KanjiCtxMap](m)) }
+func (m KanwaMap) Len() int     { return mapLen(ordered.OrderedMap[rune, KanjiCtxMap](m)) }
+
+func (m KanwaMap) MarshalJSON() ([]byte, error) {
+	return (*ordered.OrderedMap[rune, KanjiCtxMap])(&m).MarshalJSON()
+}
 
 // parseLine parses a line from a file and updates the kanwa map.
 // The line is expected to have the format "yomi kanji [ctx ...]".
@@ -105,6 +179,14 @@ func (m KanwaMap) parseLine(line string) {
 	m.update(kanji, string(yomi_runes), string(tail), token_ctx...)
 }
 
+func (m *KanwaMap) Set(k rune, v KanjiCtxMap) *KanwaMap {
+	return (*KanwaMap)(mapSet((*ordered.OrderedMap[rune, KanjiCtxMap])(m), k, v))
+}
+
+func (m *KanwaMap) UnmarshalJSON(data []byte) error {
+	return (*ordered.OrderedMap[rune, KanjiCtxMap])(m).UnmarshalJSON(data)
+}
+
 // update updates the kanwa map with a kanji character or phrase.
 // The kanji is the kanji character or phrase.
 // The yomi is the reading of the kanji character or phrase.
@@ -115,22 +197,14 @@ func (m KanwaMap) update(kanji, yomi, tail string, token_ctx ...string) {
 		kanji_runes := []rune(kanji)
 		c := kanji_runes[0]
 		if !m.Has(c) {
-			m.Set(c, KanjiCtxMap{kanji: KanjiCtx{yomi, token_ctx}})
+			v := (*KanjiCtxMap)(ordered.New[string, []KanjiCtxPair]())
+			_ = v.Set(kanji, []KanjiCtxPair{{yomi, KanjiCtx(token_ctx)}})
+			_ = m.Set(c, *v)
 			return
 		}
 
 		gotKanjiCtxMap := m.Get(c)
-		if gotKanjiCtxMap.Has(kanji) {
-			gotKanjiCtx := gotKanjiCtxMap.Get(kanji)
-			gotKanjiCtx.SetYomi(yomi)
-			gotKanjiCtx.AppendCtx(token_ctx...)
-			gotKanjiCtxMap.Set(kanji, gotKanjiCtx)
-
-		} else {
-			gotKanjiCtxMap.Set(kanji, KanjiCtx{yomi, token_ctx})
-
-		}
-
+		_ = gotKanjiCtxMap.Append(kanji, KanjiCtxPair{yomi, KanjiCtx(token_ctx)})
 		m.Set(c, gotKanjiCtxMap)
 		return
 	}
@@ -151,12 +225,12 @@ func (m KanwaMap) update(kanji, yomi, tail string, token_ctx ...string) {
 // The yomi is the reading of the kanji character or phrase.
 // The kanji is the kanji character or phrase.
 // The ctx is a list of contexts in which the kanji character or phrase is used.
-func makeKanwaMap(src_list []string) (KanwaMap, error) {
+func makeKanwaMap(src_list []string) (*KanwaMap, error) {
 	if err := verifyKanwaMapSourceList(src_list); err != nil {
 		return nil, err
 	}
 
-	m := make(KanwaMap)
+	m := (*KanwaMap)(ordered.New[rune, KanjiCtxMap]())
 	for _, src := range src_list {
 		f, err := os.OpenFile(src, os.O_RDONLY, os.ModePerm)
 		if err != nil {

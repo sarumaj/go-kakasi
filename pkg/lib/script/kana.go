@@ -8,7 +8,7 @@ import (
 // kana is a type that represents a Japanese text converter.
 // It is used to convert Hiragana, Katakana  and Extended Kana characters to Romaji characters.
 type kana struct {
-	kanaDict codegen.LookupMap
+	kanaDict *codegen.LookupMap
 }
 
 // convert_a converts Hiragana, Katakana and Extended Kana characters to Romaji characters.

@@ -19,6 +19,10 @@ func TestConfigurations(t *testing.T) {
 				t.Errorf("Configurations.%s() returns (%v, %v)", methodSpec.Name, results[0].Interface(), results[1].Interface())
 				return
 			}
+
+			if callable := results[0].MethodByName("Len"); !callable.IsValid() || callable.Call([]reflect.Value{})[0].Interface().(int) == 0 {
+				t.Errorf("Configurations.%s() returns an empty value", methodSpec.Name)
+			}
 		})
 	}
 }

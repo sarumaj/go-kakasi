@@ -2,18 +2,20 @@
 
 package codegen
 
-import "path/filepath"
+import (
+	"path/filepath"
+)
 
 // Generate is a code generation function that generates lookup maps, translation tables, and kanwa maps.
 // The generated files are written to the specified directory.
-func Generate(dst string) error {
+func Generate(dst, indent string) error {
 	for tgt, src := range lookupMapResources {
 		m, err := makeLookupMap(src)
 		if err != nil {
 			return err
 		}
 
-		if err := dumpJSON(filepath.Join(dst, tgt), m, "  "); err != nil {
+		if err := dumpJSON(filepath.Join(dst, tgt), m, indent); err != nil {
 			return err
 		}
 	}
@@ -24,7 +26,7 @@ func Generate(dst string) error {
 			return err
 		}
 
-		if err := dumpJSON(filepath.Join(dst, tgt), m, "  "); err != nil {
+		if err := dumpJSON(filepath.Join(dst, tgt), m, indent); err != nil {
 			return err
 		}
 	}
@@ -35,7 +37,7 @@ func Generate(dst string) error {
 			return err
 		}
 
-		if err := dumpJSON(filepath.Join(dst, tgt), m, "  "); err != nil {
+		if err := dumpJSON(filepath.Join(dst, tgt), m, indent); err != nil {
 			return err
 		}
 	}
