@@ -10,6 +10,8 @@ import (
 	"github/sarumaj/go-kakasi/internal/properties"
 )
 
+// IConv is a type that represents a Japanese text converter.
+// It is used to convert Japanese text to different formats.
 type IConv struct {
 	cache    *lru.Cache[string, *IConverted]
 	h2ahConv *Hira
@@ -59,6 +61,7 @@ func (c IConv) convert(text string, convert interface {
 	return converted, nil
 }
 
+// Convert converts the input text to different formats.
 func (c IConv) Convert(text, hira string) (*IConverted, error) {
 	// check if the conversion is already cached
 	cached, ok := c.cache.Get(text + ":" + hira)
@@ -113,6 +116,7 @@ func (c IConv) Convert(text, hira string) (*IConverted, error) {
 
 func (IConv) maxLen() int { return 32 }
 
+// IConverted is a type that represents a result of Japanese text conversion.
 type IConverted struct {
 	Orig     string `json:"orig"`
 	Hira     string `json:"hira"`
@@ -122,6 +126,7 @@ type IConverted struct {
 	Passport string `json:"passport"`
 }
 
+// String returns a string representation of the IConverted.
 func (i IConverted) String() string {
 	var out []string
 	v := reflect.Indirect(reflect.ValueOf(&i))
@@ -132,20 +137,39 @@ func (i IConverted) String() string {
 	return fmt.Sprintf("{%s}", strings.Join(out, ", "))
 }
 
+// IConvertedSlice is a slice of IConverted.
 type IConvertedSlice []IConverted
 
+// Furiganize returns a string with furigana.
 func (i IConvertedSlice) Furiganize() string {
+	var out string
+	for _, v := range i {
+		out += v.Orig
+		if v.Orig != v.Hira && v.Orig != v.Kana {
+			out = strings.TrimRightFunc(out, properties.Ch.IsEndmark)
+			out += "[" + strings.TrimRightFunc(v.Hira, properties.Ch.IsEndmark) + "]"
+			for _, r := range v.Hira {
+				if properties.Ch.IsEndmark(r) {
+					out += string(r)
+				}
+			}
+		}
+	}
+
+	return out
+}
+
+// Romanize returns a string with romaji.
+func (i IConvertedSlice) Romanize() string {
 	var out []string
 	for _, v := range i {
-		out = append(out, v.Orig)
-		if v.Orig != v.Hira {
-			out = append(out, fmt.Sprintf("(%s)", v.Hira))
-		}
+		out = append(out, v.Hepburn)
 	}
 
 	return strings.Join(out, "")
 }
 
+// String returns a string representation of the IConvertedSlice.
 func (i IConvertedSlice) String() string {
 	var out []string
 	for _, v := range i {
