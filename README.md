@@ -1,9 +1,9 @@
 # go-kakasi
 
 Natural Language Processing Library for Japanese.
-Based on the work of Hiroshi Miuara [pykakasi](https://codeberg.org/miurahr/pykakasi).
+Based on the work of Hiroshi Miuara: [pykakasi](https://codeberg.org/miurahr/pykakasi), who transcoded [kakasi](http://kakasi.namazu.org/index.html.en) library to Python.
 
-There exists a C binding library of [kakasi](http://kakasi.namazu.org/index.html.en): [go-kakasi](https://github.com/ysugimoto/go-kakasi).
+There already exists a C binding library of [kakasi](http://kakasi.namazu.org/index.html.en): [go-kakasi](https://github.com/ysugimoto/go-kakasi).
 This library is a pure Go implementation of [kakasi](http://kakasi.namazu.org/index.html.en), which is not platform dependent and does not require CGO to compile.
 
 ## Usage
@@ -51,16 +51,23 @@ func main() {
 ## Copyright and License
 
 **PyKakasi:**
+
 Copyright (C) 2010-2021 Hiroshi Miura and his contributors (see [AUTHORS](https://codeberg.org/miurahr/pykakasi/src/branch/master/AUTHORS))
 
 **KAKASI Dictionary**:
+
 Copyright (C) 2010-2021 Hiroshi Miura and his contributors (see [AUTHORS](https://codeberg.org/miurahr/pykakasi/src/branch/master/AUTHORS))
 
 Copyright (C) 1992 1993 1994 Hironobu Takahashi, Masahiko Sato, Yukiyoshi Kameyama, Miki Inooka, Akihiko Sasaki, Dai Ando, Junichi Okukawa, Katsushi Sato and Nobuhiro Yamagishi
 
 **UniDic**:
+
 Copyright (c) 2011-2021, The UniDic Consortium
 
 All rights reserved.
 
-Unidic is released under any of the GPL2, the LGPL2.1, or the 3-clause BSD License. (See src/data/unidic/BSD.txt) PyKakasi relicenses a part of the unidic with GPL3+.
+Unidic is released under any of the GPL2, the LGPL2.1, or the 3-clause BSD License (see [internal/codegen/data/LICENSE](internal/codegen/data/LICENSE)). [pykakasi](https://codeberg.org/miurahr/pykakasi) and this project relicense a part of the unidic with GPL3+.
+
+## Contribution
+
+Since I am not a native speaker, feel free to open issues/pull requests any time. I am grateful for any help.
