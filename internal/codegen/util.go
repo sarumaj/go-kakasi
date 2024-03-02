@@ -103,6 +103,21 @@ func mapHas[K comparable, T any](m ordered.OrderedMap[K, T], k K) bool {
 	return ok
 }
 
+// mapIter returns an iterator for a map.
+func mapIter[K comparable, V any](m ordered.OrderedMap[K, V]) func() (K, V, bool) {
+	var current *ordered.Pair[K, V] = m.Oldest()
+	return func() (K, V, bool) {
+		if current == nil {
+			var zeroK K
+			var zeroV V
+			return zeroK, zeroV, false
+		}
+
+		defer func() { current = current.Next() }()
+		return current.Key, current.Value, true
+	}
+}
+
 // mapKeys returns the keys of a map.
 func mapKeys[K comparable, T any](m ordered.OrderedMap[K, T]) []K {
 	keys := make([]K, 0, m.Len())
@@ -123,21 +138,6 @@ func mapLen[K comparable, T any](m ordered.OrderedMap[K, T]) int {
 func mapSet[K comparable, T any](m *ordered.OrderedMap[K, T], k K, v T) *ordered.OrderedMap[K, T] {
 	_, _ = m.Set(k, v)
 	return m
-}
-
-// mapIter returns an iterator for a map.
-func mapIter[K comparable, V any](m ordered.OrderedMap[K, V]) func() (K, V, bool) {
-	var current *ordered.Pair[K, V] = m.Oldest()
-	return func() (K, V, bool) {
-		if current == nil {
-			var zeroK K
-			var zeroV V
-			return zeroK, zeroV, false
-		}
-
-		defer func() { current = current.Next() }()
-		return current.Key, current.Value, true
-	}
 }
 
 // traverseFile reads a file line by line and sends each line to a channel.
