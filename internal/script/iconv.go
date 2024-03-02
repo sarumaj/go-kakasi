@@ -166,7 +166,7 @@ func (i IConvertedSlice) Romanize() string {
 		out = append(out, v.Hepburn)
 	}
 
-	return strings.Join(out, "")
+	return strings.Join(out, " ")
 }
 
 // String returns a string representation of the IConvertedSlice.

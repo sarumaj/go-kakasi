@@ -3,7 +3,7 @@
 Natural Language Processing Library for Japanese.
 Based on the work of Hiroshi Miuara: [pykakasi](https://codeberg.org/miurahr/pykakasi), who transcoded [kakasi](http://kakasi.namazu.org/index.html.en) library to Python.
 
-There already exists a C binding library of [kakasi](http://kakasi.namazu.org/index.html.en): [go-kakasi](https://github.com/ysugimoto/go-kakasi).
+There already exists a C binding library of [kakasi](http://kakasi.namazu.org/index.html.en): [go-kakasi](https://github.com/ysugimoto/go-kakasi) developed by Yoshiaki Sugimoto.
 This library is a pure Go implementation of [kakasi](http://kakasi.namazu.org/index.html.en), which is not platform-dependent and does not require CGO to compile.
 
 ## Usage
@@ -45,6 +45,18 @@ func main() {
     // この憲法[けんぽう]は、かかる原理[げんり]に基く[もとづく]ものである。われらは、これに反す[はんす]る一切[いっさい]の
     // 憲法[けんぽう]、法令[ほうれい]及び[および]詔勅[しょうちょく]を排除[はいじょ]する。
     fmt.Println(converted.Furiganize())
+
+    // Prints:
+    // nihonkokumin ha, seitou ni senkyo sareta kokkai niokeru daihyousha wo tsuuji te koudou shi,
+    // wareratowarerano shison notameni, shokokumin tono kyouwa niyoru seika to, waga kuni zendo
+    // niwatatsute jiyuu nomotarasu keitaku wo kakuho shi, seifu no koui niyotsute futatabi sensou
+    // no sanka ga okoru kotononaiyaunisurukotowo ketsui shi, kokoni shuken ga kokumin ni sonsu rukotowo
+    // sengen shi, kono kenpou wo kakuteisu ru. somosomo kokusei ha, kokumin no genshuku na shintaku
+    // niyorumonodeatsute, sono ken'i ha kokumin ni yurai shi, sono kenryoku ha kokumin no daihyousha
+    // gakorewo koushi shi, sono fukuri ha kokumin gakorewo kyouju suru. koreha jinruifuhen no genri deari,
+    // kono kenpou ha, kakaru genri ni motozuku monodearu. wareraha, koreni hansu ru issai no kenpou,
+    // hourei oyobi shouchoku wo haijo suru.
+    fmt.Println(converted.Romanize())
 }
 ```
 

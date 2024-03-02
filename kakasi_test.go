@@ -251,9 +251,11 @@ func TestKakasi(t *testing.T) {
 
 			if diff := cmp.Diff(converted, tt.want); diff != "" {
 				t.Errorf("(*Kakasi).Convert(%q) {\"-\": got, \"+\": want}: %s", tt.args, diff)
+				return
 			}
 
 			t.Log(converted.Furiganize())
+			t.Log(converted.Romanize())
 
 			testID++
 		})
