@@ -94,6 +94,7 @@ func (m *KanjiCtxPair) UnmarshalJSON(data []byte) error {
 	for _, c := range ctx {
 		m.Ctx = append(m.Ctx, fmt.Sprint(c))
 	}
+
 	return nil
 }
 
@@ -166,8 +167,8 @@ func (m KanwaMap) parseLine(line string) {
 	yomi_runes := []rune(yomi)
 
 	var tail []rune
-	if yomi_runes[len(yomi_runes)-1] <= 'z' {
-		tail = append(yomi_runes, yomi_runes[len(yomi_runes)-1])
+	if len(yomi_runes) > 0 && yomi_runes[len(yomi_runes)-1] <= 'z' {
+		tail = append(tail, yomi_runes[len(yomi_runes)-1])
 		yomi_runes = yomi_runes[: len(yomi_runes)-1 : len(yomi_runes)-1]
 	}
 
