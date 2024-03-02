@@ -4,7 +4,7 @@ Natural Language Processing Library for Japanese.
 Based on the work of Hiroshi Miuara: [pykakasi](https://codeberg.org/miurahr/pykakasi), who transcoded [kakasi](http://kakasi.namazu.org/index.html.en) library to Python.
 
 There already exists a C binding library of [kakasi](http://kakasi.namazu.org/index.html.en): [go-kakasi](https://github.com/ysugimoto/go-kakasi).
-This library is a pure Go implementation of [kakasi](http://kakasi.namazu.org/index.html.en), which is not platform dependent and does not require CGO to compile.
+This library is a pure Go implementation of [kakasi](http://kakasi.namazu.org/index.html.en), which is not platform-dependent and does not require CGO to compile.
 
 ## Usage
 
@@ -70,4 +70,4 @@ Unidic is released under any of the GPL2, the LGPL2.1, or the 3-clause BSD Licen
 
 ## Contribution
 
-Since I am not a native speaker, feel free to open issues/pull requests any time. I am grateful for any help.
+Since I am not a native speaker, feel free to open issues/pull requests anytime. I am grateful for any help. よろしくお願いします。
