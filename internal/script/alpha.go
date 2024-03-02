@@ -2,7 +2,8 @@ package script
 
 import (
 	"fmt"
-	"github/sarumaj/go-kakasi/pkg/lib/properties"
+
+	"github/sarumaj/go-kakasi/internal/properties"
 )
 
 type Alpha struct {

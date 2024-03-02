@@ -4,9 +4,10 @@ package main
 
 import (
 	"flag"
-	"github/sarumaj/go-kakasi/pkg/codegen"
 	"log"
 	"os"
+
+	"github/sarumaj/go-kakasi/internal/codegen"
 )
 
 var logger = log.New(os.Stderr, "codegen: ", 0)

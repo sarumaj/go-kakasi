@@ -1,10 +1,11 @@
 package kanji
 
 import (
-	"github/sarumaj/go-kakasi/pkg/codegen"
-	"github/sarumaj/go-kakasi/pkg/lib/properties"
 	"strings"
 	"sync"
+
+	"github/sarumaj/go-kakasi/internal/codegen"
+	"github/sarumaj/go-kakasi/internal/properties"
 )
 
 // Itaiji is a type that represents a map of Itaiji characters.

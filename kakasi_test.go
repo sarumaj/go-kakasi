@@ -2,45 +2,46 @@ package kakasi
 
 import (
 	"fmt"
-	"github/sarumaj/go-kakasi/pkg/lib/script"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+
+	"github/sarumaj/go-kakasi/internal/script"
 )
 
 func TestKakasi(t *testing.T) {
 	testID := 1
 	for _, tt := range []struct {
 		args string
-		want []script.IConverted
+		want script.IConvertedSlice
 	}{
-		{"", []script.IConverted{{}}},
-		{"構成", []script.IConverted{{Orig: "構成", Hira: "こうせい", Kana: "コウセイ", Hepburn: "kousei", Kunrei: "kousei", Passport: "kosei"}}},
-		{"好き", []script.IConverted{{Orig: "好き", Hira: "すき", Kana: "スキ", Hepburn: "suki", Kunrei: "suki", Passport: "suki"}}},
-		{"大きい", []script.IConverted{{Orig: "大きい", Hira: "おおきい", Kana: "オオキイ", Hepburn: "ookii", Kunrei: "ookii", Passport: "okii"}}},
-		{"かんたん", []script.IConverted{{Orig: "かんたん", Hira: "かんたん", Kana: "カンタン", Hepburn: "kantan", Kunrei: "kantan", Passport: "kantan"}}},
-		{"にゃ", []script.IConverted{{Orig: "にゃ", Hira: "にゃ", Kana: "ニャ", Hepburn: "nya", Kunrei: "nya", Passport: "nya"}}},
-		{"っき", []script.IConverted{{Orig: "っき", Hira: "っき", Kana: "ッキ", Hepburn: "kki", Kunrei: "kki", Passport: "kki"}}},
-		{"っふぁ", []script.IConverted{{Orig: "っふぁ", Hira: "っふぁ", Kana: "ッファ", Hepburn: "ffa", Kunrei: "ffa", Passport: "ffa"}}},
-		{"キャ", []script.IConverted{{Orig: "キャ", Hira: "きゃ", Kana: "キャ", Hepburn: "kya", Kunrei: "kya", Passport: "kya"}}},
-		{"キュ", []script.IConverted{{Orig: "キュ", Hira: "きゅ", Kana: "キュ", Hepburn: "kyu", Kunrei: "kyu", Passport: "kyu"}}},
-		{"キョ", []script.IConverted{{Orig: "キョ", Hira: "きょ", Kana: "キョ", Hepburn: "kyo", Kunrei: "kyo", Passport: "kyo"}}},
-		{"漢字とひらがな交じり文", []script.IConverted{
+		{"", script.IConvertedSlice{{}}},
+		{"構成", script.IConvertedSlice{{Orig: "構成", Hira: "こうせい", Kana: "コウセイ", Hepburn: "kousei", Kunrei: "kousei", Passport: "kosei"}}},
+		{"好き", script.IConvertedSlice{{Orig: "好き", Hira: "すき", Kana: "スキ", Hepburn: "suki", Kunrei: "suki", Passport: "suki"}}},
+		{"大きい", script.IConvertedSlice{{Orig: "大きい", Hira: "おおきい", Kana: "オオキイ", Hepburn: "ookii", Kunrei: "ookii", Passport: "okii"}}},
+		{"かんたん", script.IConvertedSlice{{Orig: "かんたん", Hira: "かんたん", Kana: "カンタン", Hepburn: "kantan", Kunrei: "kantan", Passport: "kantan"}}},
+		{"にゃ", script.IConvertedSlice{{Orig: "にゃ", Hira: "にゃ", Kana: "ニャ", Hepburn: "nya", Kunrei: "nya", Passport: "nya"}}},
+		{"っき", script.IConvertedSlice{{Orig: "っき", Hira: "っき", Kana: "ッキ", Hepburn: "kki", Kunrei: "kki", Passport: "kki"}}},
+		{"っふぁ", script.IConvertedSlice{{Orig: "っふぁ", Hira: "っふぁ", Kana: "ッファ", Hepburn: "ffa", Kunrei: "ffa", Passport: "ffa"}}},
+		{"キャ", script.IConvertedSlice{{Orig: "キャ", Hira: "きゃ", Kana: "キャ", Hepburn: "kya", Kunrei: "kya", Passport: "kya"}}},
+		{"キュ", script.IConvertedSlice{{Orig: "キュ", Hira: "きゅ", Kana: "キュ", Hepburn: "kyu", Kunrei: "kyu", Passport: "kyu"}}},
+		{"キョ", script.IConvertedSlice{{Orig: "キョ", Hira: "きょ", Kana: "キョ", Hepburn: "kyo", Kunrei: "kyo", Passport: "kyo"}}},
+		{"漢字とひらがな交じり文", script.IConvertedSlice{
 			{Orig: "漢字", Hira: "かんじ", Kana: "カンジ", Hepburn: "kanji", Kunrei: "kanzi", Passport: "kanji"},
 			{Orig: "とひらがな", Hira: "とひらがな", Kana: "トヒラガナ", Hepburn: "tohiragana", Kunrei: "tohiragana", Passport: "tohiragana"},
 			{Orig: "交じり", Hira: "まじり", Kana: "マジリ", Hepburn: "majiri", Kunrei: "maziri", Passport: "majiri"},
 			{Orig: "文", Hira: "ぶん", Kana: "ブン", Hepburn: "bun", Kunrei: "bun", Passport: "bun"},
 		}},
-		{"Alphabet 123 and 漢字", []script.IConverted{
+		{"Alphabet 123 and 漢字", script.IConvertedSlice{
 			{Orig: "Alphabet 123 and ", Hira: "Alphabet 123 and ", Kana: "Alphabet 123 and ", Hepburn: "Alphabet 123 and ", Kunrei: "Alphabet 123 and ", Passport: "Alphabet 123 and "},
 			{Orig: "漢字", Hira: "かんじ", Kana: "カンジ", Hepburn: "kanji", Kunrei: "kanzi", Passport: "kanji"},
 		}},
-		{"日経新聞", []script.IConverted{{Orig: "日経新聞", Hira: "にっけいしんぶん", Kana: "ニッケイシンブン", Hepburn: "nikkeishinbun", Kunrei: "nikkeisinbun", Passport: "nikkeishimbun"}}},
-		{"日本国民は、", []script.IConverted{
+		{"日経新聞", script.IConvertedSlice{{Orig: "日経新聞", Hira: "にっけいしんぶん", Kana: "ニッケイシンブン", Hepburn: "nikkeishinbun", Kunrei: "nikkeisinbun", Passport: "nikkeishimbun"}}},
+		{"日本国民は、", script.IConvertedSlice{
 			{Orig: "日本国民", Hira: "にほんこくみん", Kana: "ニホンコクミン", Hepburn: "nihonkokumin", Kunrei: "nihonkokumin", Passport: "nihonkokumin"},
 			{Orig: "は、", Hira: "は、", Kana: "ハ、", Hepburn: "ha,", Kunrei: "ha,", Passport: "ha,"},
 		}},
-		{"私がこの子を助けなきゃいけないってことだよね", []script.IConverted{
+		{"私がこの子を助けなきゃいけないってことだよね", script.IConvertedSlice{
 			{Orig: "私", Hira: "わたし", Kana: "ワタシ", Hepburn: "watashi", Kunrei: "watasi", Passport: "watashi"},
 			{Orig: "がこの", Hira: "がこの", Kana: "ガコノ", Hepburn: "gakono", Kunrei: "gakono", Passport: "gakono"},
 			{Orig: "子", Hira: "こ", Kana: "コ", Hepburn: "ko", Kunrei: "ko", Passport: "ko"},
@@ -48,20 +49,20 @@ func TestKakasi(t *testing.T) {
 			{Orig: "助け", Hira: "たすけ", Kana: "タスケ", Hepburn: "tasuke", Kunrei: "tasuke", Passport: "tasuke"},
 			{Orig: "なきゃいけないってことだよね", Hira: "なきゃいけないってことだよね", Kana: "ナキャイケナイッテコトダヨネ", Hepburn: "nakyaikenaittekotodayone", Kunrei: "nakyaikenaittekotodayone", Passport: "nakyaikenaittekotodayone"},
 		}},
-		{"やったー", []script.IConverted{{Orig: "やったー", Hira: "やったー", Kana: "ヤッター", Hepburn: "yattaa", Kunrei: "yattaa", Passport: "yattaa"}}},
-		{"でっでー", []script.IConverted{{Orig: "でっでー", Hira: "でっでー", Kana: "デッデー", Hepburn: "deddee", Kunrei: "deddee", Passport: "deddee"}}},
-		{"てんさーふろー", []script.IConverted{{Orig: "てんさーふろー", Hira: "てんさーふろー", Kana: "テンサーフロー", Hepburn: "tensaafuroo", Kunrei: "tensaafuroo", Passport: "tensaafuroo"}}},
-		{"オレンジ色", []script.IConverted{
+		{"やったー", script.IConvertedSlice{{Orig: "やったー", Hira: "やったー", Kana: "ヤッター", Hepburn: "yattaa", Kunrei: "yattaa", Passport: "yattaa"}}},
+		{"でっでー", script.IConvertedSlice{{Orig: "でっでー", Hira: "でっでー", Kana: "デッデー", Hepburn: "deddee", Kunrei: "deddee", Passport: "deddee"}}},
+		{"てんさーふろー", script.IConvertedSlice{{Orig: "てんさーふろー", Hira: "てんさーふろー", Kana: "テンサーフロー", Hepburn: "tensaafuroo", Kunrei: "tensaafuroo", Passport: "tensaafuroo"}}},
+		{"オレンジ色", script.IConvertedSlice{
 			{Orig: "オレンジ", Hira: "おれんじ", Kana: "オレンジ", Hepburn: "orenji", Kunrei: "orenzi", Passport: "orenji"},
 			{Orig: "色", Hira: "いろ", Kana: "イロ", Hepburn: "iro", Kunrei: "iro", Passport: "iro"},
 		}},
-		{"檸檬は、レモン色", []script.IConverted{
+		{"檸檬は、レモン色", script.IConvertedSlice{
 			{Orig: "檸檬", Hira: "れもん", Kana: "レモン", Hepburn: "remon", Kunrei: "remon", Passport: "remon"},
 			{Orig: "は、", Hira: "は、", Kana: "ハ、", Hepburn: "ha,", Kunrei: "ha,", Passport: "ha,"},
 			{Orig: "レモン", Hira: "れもん", Kana: "レモン", Hepburn: "remon", Kunrei: "remon", Passport: "remon"},
 			{Orig: "色", Hira: "いろ", Kana: "イロ", Hepburn: "iro", Kunrei: "iro", Passport: "iro"},
 		}},
-		{"私がこの子を助けなきゃいけないってことだよね", []script.IConverted{
+		{"私がこの子を助けなきゃいけないってことだよね", script.IConvertedSlice{
 			{Orig: "私", Hira: "わたし", Kana: "ワタシ", Hepburn: "watashi", Kunrei: "watasi", Passport: "watashi"},
 			{Orig: "がこの", Hira: "がこの", Kana: "ガコノ", Hepburn: "gakono", Kunrei: "gakono", Passport: "gakono"},
 			{Orig: "子", Hira: "こ", Kana: "コ", Hepburn: "ko", Kunrei: "ko", Passport: "ko"},
@@ -69,32 +70,32 @@ func TestKakasi(t *testing.T) {
 			{Orig: "助け", Hira: "たすけ", Kana: "タスケ", Hepburn: "tasuke", Kunrei: "tasuke", Passport: "tasuke"},
 			{Orig: "なきゃいけないってことだよね", Hira: "なきゃいけないってことだよね", Kana: "ナキャイケナイッテコトダヨネ", Hepburn: "nakyaikenaittekotodayone", Kunrei: "nakyaikenaittekotodayone", Passport: "nakyaikenaittekotodayone"},
 		}},
-		{"ｿｳｿﾞｸﾆﾝ", []script.IConverted{{Orig: "ｿｳｿﾞｸﾆﾝ", Hira: "そうぞくにん", Kana: "ｿｳｿﾞｸﾆﾝ", Hepburn: "souzokunin", Kunrei: "souzokunin", Passport: "sozokunin"}}},
-		{"思った 言った 行った", []script.IConverted{
+		{"ｿｳｿﾞｸﾆﾝ", script.IConvertedSlice{{Orig: "ｿｳｿﾞｸﾆﾝ", Hira: "そうぞくにん", Kana: "ｿｳｿﾞｸﾆﾝ", Hepburn: "souzokunin", Kunrei: "souzokunin", Passport: "sozokunin"}}},
+		{"思った 言った 行った", script.IConvertedSlice{
 			{Orig: "思った", Hira: "おもった", Kana: "オモッタ", Hepburn: "omotta", Kunrei: "omotta", Passport: "omotta"},
 			{Orig: " ", Hira: " ", Kana: " ", Hepburn: " ", Kunrei: " ", Passport: " "},
 			{Orig: "言った", Hira: "いった", Kana: "イッタ", Hepburn: "itta", Kunrei: "itta", Passport: "itta"},
 			{Orig: " ", Hira: " ", Kana: " ", Hepburn: " ", Kunrei: " ", Passport: " "},
 			{Orig: "行った", Hira: "いった", Kana: "イッタ", Hepburn: "itta", Kunrei: "itta", Passport: "itta"},
 		}},
-		{"ﾞっ、", []script.IConverted{
+		{"ﾞっ、", script.IConvertedSlice{
 			{Orig: "ﾞ", Hira: "゛", Kana: "ﾞ", Hepburn: "\"", Kunrei: "゛", Passport: "゛"},
 			{Orig: "っ、", Hira: "っ、", Kana: "ッ、", Hepburn: "tsu,", Kunrei: "tu,", Passport: "tsu,"},
 		}},
-		{"藍之介", []script.IConverted{{Orig: "藍之介", Hira: "あいのすけ", Kana: "アイノスケ", Hepburn: "ainosuke", Kunrei: "ainosuke", Passport: "ainosuke"}}},
-		{"藍水", []script.IConverted{{Orig: "藍水", Hira: "らんすい", Kana: "ランスイ", Hepburn: "ransui", Kunrei: "ransui", Passport: "ransui"}}},
-		{"見えますか？", []script.IConverted{
+		{"藍之介", script.IConvertedSlice{{Orig: "藍之介", Hira: "あいのすけ", Kana: "アイノスケ", Hepburn: "ainosuke", Kunrei: "ainosuke", Passport: "ainosuke"}}},
+		{"藍水", script.IConvertedSlice{{Orig: "藍水", Hira: "らんすい", Kana: "ランスイ", Hepburn: "ransui", Kunrei: "ransui", Passport: "ransui"}}},
+		{"見えますか？", script.IConvertedSlice{
 			{Orig: "見え", Hira: "みえ", Kana: "ミエ", Hepburn: "mie", Kunrei: "mie", Passport: "mie"},
 			{Orig: "ますか？", Hira: "ますか？", Kana: "マスカ？", Hepburn: "masuka？", Kunrei: "masuka？", Passport: "masuka？"},
 		}},
-		{"バニーちゃんちのシャワーノズルの先端", []script.IConverted{
+		{"バニーちゃんちのシャワーノズルの先端", script.IConvertedSlice{
 			{Orig: "バニー", Hira: "ばにー", Kana: "バニー", Hepburn: "banii", Kunrei: "banii", Passport: "banii"},
 			{Orig: "ちゃんちの", Hira: "ちゃんちの", Kana: "チャンチノ", Hepburn: "chanchino", Kunrei: "tyantino", Passport: "chanchino"},
 			{Orig: "シャワーノズル", Hira: "しゃわーのずる", Kana: "シャワーノズル", Hepburn: "shawaanozuru", Kunrei: "syawaanozuru", Passport: "shawaanozuru"},
 			{Orig: "の", Hira: "の", Kana: "ノ", Hepburn: "no", Kunrei: "no", Passport: "no"},
 			{Orig: "先端", Hira: "せんたん", Kana: "センタン", Hepburn: "sentan", Kunrei: "sentan", Passport: "sentan"},
 		}},
-		{"明日は明日の風が吹く", []script.IConverted{
+		{"明日は明日の風が吹く", script.IConvertedSlice{
 			{Orig: "明日", Hira: "あした", Kana: "アシタ", Hepburn: "ashita", Kunrei: "asita", Passport: "ashita"},
 			{Orig: "は", Hira: "は", Kana: "ハ", Hepburn: "ha", Kunrei: "ha", Passport: "ha"},
 			{Orig: "明日", Hira: "あした", Kana: "アシタ", Hepburn: "ashita", Kunrei: "asita", Passport: "ashita"},
@@ -103,8 +104,8 @@ func TestKakasi(t *testing.T) {
 			{Orig: "が", Hira: "が", Kana: "ガ", Hepburn: "ga", Kunrei: "ga", Passport: "ga"},
 			{Orig: "吹く", Hira: "ふく", Kana: "フク", Hepburn: "fuku", Kunrei: "fuku", Passport: "fuku"},
 		}},
-		{"\uF862\u6709\u9650\u4F1A\u793E", []script.IConverted{{Orig: "有限会社", Hira: "ゆうげんがいしゃ", Kana: "ユウゲンガイシャ", Hepburn: "yuugengaisha", Kunrei: "yuugengaisya", Passport: "yuugengaisha"}}},
-		{"三\u00D7五", []script.IConverted{
+		{"\uF862\u6709\u9650\u4F1A\u793E", script.IConvertedSlice{{Orig: "有限会社", Hira: "ゆうげんがいしゃ", Kana: "ユウゲンガイシャ", Hepburn: "yuugengaisha", Kunrei: "yuugengaisya", Passport: "yuugengaisha"}}},
+		{"三\u00D7五", script.IConvertedSlice{
 			{Orig: "三", Hira: "さん", Kana: "サン", Hepburn: "san", Kunrei: "san", Passport: "san"},
 			{Orig: "×", Hira: "×", Kana: "×", Hepburn: "x", Kunrei: "x", Passport: "x"},
 			{Orig: "五", Hira: "ご", Kana: "ゴ", Hepburn: "go", Kunrei: "go", Passport: "go"},
@@ -114,7 +115,7 @@ func TestKakasi(t *testing.T) {
 			"政府の行為によつて再び戦争の惨禍が起ることのないやうにすることを決意し、ここに主権が国民に存することを宣言し、" +
 			"この憲法を確定する。そもそも国政は、国民の厳粛な信託によるものであつて、その権威は国民に由来し、" +
 			"その権力は国民の代表者がこれを行使し、その福利は国民がこれを享受する。これは人類普遍の原理であり、" +
-			"この憲法は、かかる原理に基くものである。われらは、これに反する一切の憲法、法令及び詔勅を排除する。", []script.IConverted{
+			"この憲法は、かかる原理に基くものである。われらは、これに反する一切の憲法、法令及び詔勅を排除する。", script.IConvertedSlice{
 			{Orig: "日本国民", Hira: "にほんこくみん", Kana: "ニホンコクミン", Hepburn: "nihonkokumin", Kunrei: "nihonkokumin", Passport: "nihonkokumin"},
 			{Orig: "は、", Hira: "は、", Kana: "ハ、", Hepburn: "ha,", Kunrei: "ha,", Passport: "ha,"},
 			{Orig: "正当", Hira: "せいとう", Kana: "セイトウ", Hepburn: "seitou", Kunrei: "seitou", Passport: "seito"},
@@ -251,6 +252,8 @@ func TestKakasi(t *testing.T) {
 			if diff := cmp.Diff(converted, tt.want); diff != "" {
 				t.Errorf("(*Kakasi).Convert(%q) {\"-\": got, \"+\": want}: %s", tt.args, diff)
 			}
+
+			t.Log(converted.Furiganize())
 
 			testID++
 		})

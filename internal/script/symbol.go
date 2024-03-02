@@ -2,7 +2,8 @@ package script
 
 import (
 	"fmt"
-	"github/sarumaj/go-kakasi/pkg/lib/properties"
+
+	"github/sarumaj/go-kakasi/internal/properties"
 )
 
 type Symbol struct {
@@ -84,7 +85,7 @@ func (s Symbol) convert_a(text string) (string, int, error) {
 	return converted, max_length, nil
 }
 
-func (s Symbol) IsRegion(ch rune) bool {
+func (Symbol) IsRegion(ch rune) bool {
 	switch {
 	case
 		properties.Ch.IdeographicSpace() <= ch && ch <= properties.Ch.PostalMarkFace(),

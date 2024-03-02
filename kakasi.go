@@ -1,26 +1,36 @@
 package kakasi
 
 import (
-	"github/sarumaj/go-kakasi/pkg/lib/kanji"
-	"github/sarumaj/go-kakasi/pkg/lib/properties"
-	"github/sarumaj/go-kakasi/pkg/lib/script"
+	"github/sarumaj/go-kakasi/internal/kanji"
+	"github/sarumaj/go-kakasi/internal/properties"
+	"github/sarumaj/go-kakasi/internal/script"
 	"strings"
 
 	"golang.org/x/text/unicode/norm"
 )
+
+const (
+	chKanji chType = iota + 1
+	chKana
+	chHiragana
+	chSymbol
+	chAlpha
+)
+
+type chType int
 
 type Kakasi struct {
 	iConv *script.IConv
 	jConv *kanji.JConv
 }
 
-func (k Kakasi) Convert(text string) ([]script.IConverted, error) {
+func (k Kakasi) Convert(text string) (script.IConvertedSlice, error) {
 	if len([]rune(text)) == 0 {
-		return []script.IConverted{{}}, nil
+		return script.IConvertedSlice{{}}, nil
 	}
 
 	var originalText, kanaText string
-	var results []script.IConverted
+	var results script.IConvertedSlice
 	var fBuffer bool // output buffer flag
 	var fText bool   // output text flag
 	var fCpInc bool  // output copy and increment flag

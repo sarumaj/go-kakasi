@@ -2,9 +2,10 @@ package kanji
 
 import (
 	"fmt"
-	"github/sarumaj/go-kakasi/pkg/codegen"
 
 	lru "github.com/hashicorp/golang-lru/v2"
+
+	"github/sarumaj/go-kakasi/internal/codegen"
 )
 
 // JConv is a type that represents a Japanese text converter.

@@ -2,11 +2,12 @@ package script
 
 import (
 	"fmt"
-	"github/sarumaj/go-kakasi/pkg/lib/properties"
 	"reflect"
 	"strings"
 
 	lru "github.com/hashicorp/golang-lru/v2"
+
+	"github/sarumaj/go-kakasi/internal/properties"
 )
 
 type IConv struct {
@@ -129,6 +130,29 @@ func (i IConverted) String() string {
 	}
 
 	return fmt.Sprintf("{%s}", strings.Join(out, ", "))
+}
+
+type IConvertedSlice []IConverted
+
+func (i IConvertedSlice) Furiganize() string {
+	var out []string
+	for _, v := range i {
+		out = append(out, v.Orig)
+		if v.Orig != v.Hira {
+			out = append(out, fmt.Sprintf("(%s)", v.Hira))
+		}
+	}
+
+	return strings.Join(out, "")
+}
+
+func (i IConvertedSlice) String() string {
+	var out []string
+	for _, v := range i {
+		out = append(out, v.String())
+	}
+
+	return fmt.Sprintf("[%s]", strings.Join(out, ", "))
 }
 
 func NewIConv() (*IConv, error) {
