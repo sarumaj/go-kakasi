@@ -74,11 +74,11 @@ func main() {
 
 **PyKakasi:**
 
-Copyright (C) 2010-2021 Hiroshi Miura and his contributors (see [AUTHORS](internal/codegen/data/AUTHORS))
+Copyright (C) 2010-2021 Hiroshi Miura and his contributors (see [AUTHORS](internal/codegen/data/AUTHORS.md))
 
 **KAKASI Dictionary**:
 
-Copyright (C) 2010-2021 Hiroshi Miura and his contributors (see [AUTHORS](internal/codegen/data/AUTHORS))
+Copyright (C) 2010-2021 Hiroshi Miura and his contributors (see [AUTHORS](internal/codegen/data/AUTHORS.md))
 
 Copyright (C) 1992 1993 1994 Hironobu Takahashi, Masahiko Sato, Yukiyoshi Kameyama, Miki Inooka, Akihiko Sasaki, Dai Ando, Junichi Okukawa, Katsushi Sato and Nobuhiro Yamagishi
 
