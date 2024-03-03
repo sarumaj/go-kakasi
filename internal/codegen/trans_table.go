@@ -43,16 +43,16 @@ func (m *TransTable) Set(c rune, v string) *TransTable {
 // spoof adds a range of runes to the table.
 // If a rune is already in the table, it is skipped.
 // If a rune is not in the table, it is added with an empty slice of strings.
-func (m TransTable) spoof(lo, hi int64) {
+func (m *TransTable) spoof(lo, hi int64) {
 	for i := lo; i <= hi; i++ {
 		c := rune(i)
 		if m.Has(c) {
 			continue
 		}
 
-		o := ordered.OrderedMap[rune, *string](m)
+		o := (*ordered.OrderedMap[rune, *string])(m)
 		o.Set(c, nil)
-		m = TransTable(o)
+		m = (*TransTable)(o)
 	}
 }
 
