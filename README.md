@@ -11,7 +11,7 @@
 # go-kakasi
 
 Natural Language Processing Library for Japanese.
-Based on the work of Hiroshi Miuara: [pykakasi](https://codeberg.org/miurahr/pykakasi), who transcoded [kakasi](http://kakasi.namazu.org/index.html.en) library to Python.
+Based on the work of Hiroshi Miura: [pykakasi](https://codeberg.org/miurahr/pykakasi), who transcoded [kakasi](http://kakasi.namazu.org/index.html.en) library to Python.
 
 There already exists a C-binding-library of [kakasi](http://kakasi.namazu.org/index.html.en): [go-kakasi](https://github.com/ysugimoto/go-kakasi) developed by Yoshiaki Sugimoto.
 This library is a pure Go implementation of [kakasi](http://kakasi.namazu.org/index.html.en), which is not platform-dependent and does not require CGO to compile.
