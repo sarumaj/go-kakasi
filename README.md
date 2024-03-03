@@ -24,7 +24,7 @@ package main
 import (
     "fmt"
 
-    "github/sarumaj/go-kakasi"
+    "github.com/sarumaj/go-kakasi"
 )
 
 func main() {
