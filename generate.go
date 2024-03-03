@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"github/sarumaj/go-kakasi/internal/codegen"
+	"github.com/sarumaj/go-kakasi/internal/codegen"
 )
 
 var logger = log.New(os.Stderr, "codegen: ", 0)
