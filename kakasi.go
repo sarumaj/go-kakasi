@@ -18,20 +18,35 @@ const (
 	chAlpha
 )
 
+var (
+	symbol = script.Symbol{}
+	kata   = script.Kata{}
+	hira   = script.Hira{}
+	alpha  = script.Alpha{}
+)
+
 type chType int
 
+// IConverted is a type that represents a converted text.
+type IConverted = script.IConverted
+
+// IConvertedSlice is a slice of IConverted.
+type IConvertedSlice = script.IConvertedSlice
+
+// Kakasi is a type that represents a Japanese text converter.
 type Kakasi struct {
 	iConv *script.IConv
 	jConv *kanji.JConv
 }
 
-func (k Kakasi) Convert(text string) (script.IConvertedSlice, error) {
+// Convert converts the input text to kana/romaji.
+func (k Kakasi) Convert(text string) (IConvertedSlice, error) {
 	if len([]rune(text)) == 0 {
-		return script.IConvertedSlice{{}}, nil
+		return IConvertedSlice{{}}, nil
 	}
 
 	var originalText, kanaText string
-	var results script.IConvertedSlice
+	var results IConvertedSlice
 	var fBuffer bool // output buffer flag
 	var fText bool   // output text flag
 	var fCpInc bool  // output copy and increment flag
@@ -44,16 +59,16 @@ func (k Kakasi) Convert(text string) (script.IConvertedSlice, error) {
 		case properties.Ch.IsLongSymbol(ch):
 			fBuffer, fText, fCpInc = false, false, true
 
-		case script.Symbol{}.IsRegion(ch):
+		case symbol.IsRegion(ch):
 			fBuffer, fText, fCpInc, t = t != chSymbol, t == chSymbol, true, chSymbol
 
-		case script.Kata{}.IsRegion(ch):
+		case kata.IsRegion(ch):
 			fBuffer, fText, fCpInc, t = t != chKana, false, true, chKana
 
-		case script.Hira{}.IsRegion(ch):
+		case hira.IsRegion(ch):
 			fBuffer, fText, fCpInc, t = t != chHiragana, false, true, chHiragana
 
-		case script.Alpha{}.IsRegion(ch):
+		case alpha.IsRegion(ch):
 			fBuffer, fText, fCpInc, t = t != chAlpha, false, true, chAlpha
 
 		case k.jConv.IsRegion(ch):
@@ -151,7 +166,9 @@ func (k Kakasi) Convert(text string) (script.IConvertedSlice, error) {
 	return results, nil
 }
 
-func (k Kakasi) Normalize(text string) (string, error) {
+// Normalize normalizes the input text.
+// It converts the input text to NFKC and standardizes long symbols.
+func (Kakasi) Normalize(text string) (string, error) {
 	text = strings.NewReplacer(
 		"〜", "ー",
 		"～", "ー",
