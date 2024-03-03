@@ -67,6 +67,17 @@ func main() {
     // kono kenpou ha, kakaru genri ni motozuku monodearu. wareraha, koreni hansu ru issai no kenpou,
     // hourei oyobi shouchoku wo haijo suru.
     fmt.Println(converted.Romanize())
+
+    // Prints:
+    // {
+    //     Orig: "日本国民",
+    //     Hira: "にほんこくみん",
+    //     Kana: "ニホンコクミン",
+    //     Hepburn: "nihonkokumin",
+    //     Kunrei: "nihonkokumin",
+    //     Passport: "nihonkokumin",
+    // }
+    fmt.Println(converted[0])
 }
 ```
 
