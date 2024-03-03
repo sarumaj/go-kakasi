@@ -70,6 +70,10 @@ func main() {
 }
 ```
 
+## Projects
+
+- [bing-wallpaper-changer](https://github.com/sarumaj/bing-wallpaper-changer) uses **go-kakasi** to add Furigana annotations to image descriptions for the Japanese Bing wallpapers.
+
 ## Copyright and License
 
 **PyKakasi:**
