@@ -3,8 +3,8 @@ package script
 import (
 	"fmt"
 
-	"github/sarumaj/go-kakasi/internal/codegen"
-	"github/sarumaj/go-kakasi/internal/properties"
+	"github.com/sarumaj/go-kakasi/internal/codegen"
+	"github.com/sarumaj/go-kakasi/internal/properties"
 )
 
 // Kata is a type that represents a Japanese text converter.

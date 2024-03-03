@@ -3,7 +3,7 @@ package properties
 import (
 	"github.com/goccy/go-json"
 
-	"github/sarumaj/go-kakasi/internal/codegen"
+	"github.com/sarumaj/go-kakasi/internal/codegen"
 )
 
 // Configurations is a set of configuration values.

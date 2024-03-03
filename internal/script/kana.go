@@ -3,7 +3,7 @@ package script
 import (
 	"fmt"
 
-	"github/sarumaj/go-kakasi/internal/codegen"
+	"github.com/sarumaj/go-kakasi/internal/codegen"
 )
 
 // kana is a type that represents a Japanese text converter.

@@ -3,7 +3,7 @@ package script
 import (
 	"fmt"
 
-	"github/sarumaj/go-kakasi/internal/properties"
+	"github.com/sarumaj/go-kakasi/internal/properties"
 )
 
 type Symbol struct {

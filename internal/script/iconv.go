@@ -7,7 +7,7 @@ import (
 
 	lru "github.com/hashicorp/golang-lru/v2"
 
-	"github/sarumaj/go-kakasi/internal/properties"
+	"github.com/sarumaj/go-kakasi/internal/properties"
 )
 
 // IConv is a type that represents a Japanese text converter.

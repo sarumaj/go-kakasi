@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github/sarumaj/go-kakasi/internal/script"
+	"github.com/sarumaj/go-kakasi/internal/script"
 )
 
 func TestKakasi(t *testing.T) {

@@ -5,7 +5,7 @@ import (
 
 	lru "github.com/hashicorp/golang-lru/v2"
 
-	"github/sarumaj/go-kakasi/internal/codegen"
+	"github.com/sarumaj/go-kakasi/internal/codegen"
 )
 
 // JConv is a type that represents a Japanese text converter.

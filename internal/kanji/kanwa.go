@@ -3,8 +3,8 @@ package kanji
 import (
 	"sync"
 
-	"github/sarumaj/go-kakasi/internal/codegen"
-	"github/sarumaj/go-kakasi/internal/properties"
+	"github.com/sarumaj/go-kakasi/internal/codegen"
+	"github.com/sarumaj/go-kakasi/internal/properties"
 )
 
 // Kanwa is a type that represents a map of Kanwa characters.

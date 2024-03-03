@@ -1,10 +1,11 @@
 package kakasi
 
 import (
-	"github/sarumaj/go-kakasi/internal/kanji"
-	"github/sarumaj/go-kakasi/internal/properties"
-	"github/sarumaj/go-kakasi/internal/script"
 	"strings"
+
+	"github.com/sarumaj/go-kakasi/internal/kanji"
+	"github.com/sarumaj/go-kakasi/internal/properties"
+	"github.com/sarumaj/go-kakasi/internal/script"
 
 	"golang.org/x/text/unicode/norm"
 )
