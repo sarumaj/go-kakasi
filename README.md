@@ -1,8 +1,8 @@
 [![test_and_report](https://github.com/sarumaj/go-kakasi/actions/workflows/test_and_report.yml/badge.svg)](https://github.com/sarumaj/go-kakasi/actions/workflows/test_and_report.yml)
 [![build_and_release](https://github.com/sarumaj/go-kakasi/actions/workflows/build_and_release.yml/badge.svg)](https://github.com/sarumaj/go-kakasi/actions/workflows/build_and_release.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/sarumaj/go-kakasi)](https://goreportcard.com/report/github.com/sarumaj/go-kakasi)
-[![Maintainability](https://api.codeclimate.com/v1/badges/a966bfa0958448644bd2/maintainability)](https://codeclimate.com/github/sarumaj/go-kakasi/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/a966bfa0958448644bd2/test_coverage)](https://codeclimate.com/github/sarumaj/go-kakasi/test_coverage)
+[![Maintainability](https://qlty.sh/gh/sarumaj/projects/go-kakasi/maintainability.svg)](https://qlty.sh/gh/sarumaj/projects/go-kakasi)
+[![Code Coverage](https://qlty.sh/gh/sarumaj/projects/go-kakasi/coverage.svg)](https://qlty.sh/gh/sarumaj/projects/go-kakasi)
 [![Go Reference](https://pkg.go.dev/badge/github.com/sarumaj/go-kakasi.svg)](https://pkg.go.dev/github.com/sarumaj/go-kakasi)
 [![Go version](https://img.shields.io/github/go-mod/go-version/sarumaj/go-kakasi?logo=go&label=&labelColor=gray)](https://go.dev)
 
