@@ -1,6 +1,6 @@
 module github.com/sarumaj/go-kakasi
 
-go 1.24.0
+go 1.25.0
 
 require (
 	github.com/goccy/go-json v0.10.5
