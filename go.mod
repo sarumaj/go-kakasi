@@ -1,13 +1,13 @@
 module github.com/sarumaj/go-kakasi
 
-go 1.24.0
+go 1.25.0
 
 require (
-	github.com/goccy/go-json v0.10.5
+	github.com/goccy/go-json v0.10.6
 	github.com/google/go-cmp v0.7.0
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/wk8/go-ordered-map/v2 v2.1.8
-	golang.org/x/text v0.32.0
+	golang.org/x/text v0.35.0
 )
 
 require (
