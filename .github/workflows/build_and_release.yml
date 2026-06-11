@@ -36,7 +36,11 @@ jobs:
         run: echo "MODULE_NAME=$(go mod edit -json | jq -r '.Module.Path')" >> "$GITHUB_OUTPUT"
 
       - name: Generate dynamic code samples and run linters
-        run: go generate ./... && gofmt -s -d ./ && golangci-lint run -v
+        run: |
+          go generate ./...
+          gofmt -s -d $(find . -type f -name '*.go'| grep -v "/vendor/")
+          golangci-lint run -v && golangci-lint run -v --exclude-dirs-use-default -e printf
+        shell: bash
 
       - name: Run tests with coverage
         run: go test ./... -coverprofile=coverage.out
