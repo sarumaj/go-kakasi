@@ -1,9 +1,9 @@
 package codegen
 
 import (
-	"context"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	ordered "github.com/wk8/go-ordered-map/v2"
@@ -28,6 +28,12 @@ type LookupMap ordered.OrderedMap[string, string]
 func (m LookupMap) Get(k string) string { return mapGet(ordered.OrderedMap[string, string](m), k) }
 func (m LookupMap) Has(k string) bool   { return mapHas(ordered.OrderedMap[string, string](m), k) }
 
+// Lookup returns the value stored under k and reports whether it was present.
+func (m LookupMap) Lookup(k string) (string, bool) {
+	o := ordered.OrderedMap[string, string](m)
+	return o.Get(k)
+}
+
 func (m LookupMap) Iter() func() (string, string, bool) {
 	return mapIter(ordered.OrderedMap[string, string](m))
 }
@@ -39,19 +45,22 @@ func (m LookupMap) MarshalJSON() ([]byte, error) {
 	return (*ordered.OrderedMap[string, string])(&m).MarshalJSON()
 }
 
-// MaxKeyLen returns the length of the longest key in the map.
+// maxKeyLenKey is the pseudo entry under which makeLookupMap caches the result
+// of MaxKeyLen inside the serialized map.
+const maxKeyLenKey = "_max_key_len_"
+
+// MaxKeyLen returns the length, in runes, of the longest key in the map.
 func (m LookupMap) MaxKeyLen() int {
-	if m.Has("_max_key_len_") {
-		var l int
-		if _, err := fmt.Sscanf(m.Get("_max_key_len_"), "%d", &l); err == nil {
+	if v, ok := m.Lookup(maxKeyLenKey); ok {
+		if l, err := strconv.Atoi(v); err == nil {
 			return l
 		}
 	}
 
 	l, o := 0, ordered.OrderedMap[string, string](m)
 	for p := o.Oldest(); p != nil; p = p.Next() {
-		if len([]rune(p.Key)) > l {
-			l = len(p.Key)
+		if n := len([]rune(p.Key)); n > l {
+			l = n
 		}
 	}
 
@@ -74,23 +83,16 @@ func makeLookupMap(src string) (*LookupMap, error) {
 		return nil, err
 	}
 
-	f, err := os.OpenFile(src, os.O_RDONLY, os.ModePerm)
-	if err != nil {
+	m := (*LookupMap)(ordered.New[string, string]())
+	if err := traverseFile(src, func(line string) error {
+		v, k, _ := strings.Cut(line, " ")
+		m.Set(k, v)
+		return nil
+	}); err != nil {
 		return nil, err
 	}
 
-	defer f.Close()
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	m := (*LookupMap)(ordered.New[string, string]())
-	for line := range traverseFile(ctx, f) {
-		v, k, _ := strings.Cut(line, " ")
-		m.Set(k, v)
-	}
-
-	m.Set("_max_key_len_", fmt.Sprintf("%d", m.MaxKeyLen()))
+	m.Set(maxKeyLenKey, strconv.Itoa(m.MaxKeyLen()))
 
 	return m, nil
 }

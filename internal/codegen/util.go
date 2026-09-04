@@ -2,7 +2,6 @@ package codegen
 
 import (
 	"bufio"
-	"context"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -13,42 +12,15 @@ import (
 	ordered "github.com/wk8/go-ordered-map/v2"
 )
 
-// decodeEscapes decodes escape sequences in a string.
-func decodeEscapes(s string) string {
-	// Unescape Unicode sequences
-	reUnicode := regexp.MustCompile(`\\[uU][0-9a-fA-F]{4,8}`)
-	s = reUnicode.ReplaceAllStringFunc(s, func(match string) string {
-		r, err := strconv.ParseInt(match[2:], 16, 32)
-		if err != nil {
-			return match // Return the original match if there's an error
-		}
-		return string(rune(r))
-	})
+// Escape sequences understood by decodeEscapes. The patterns and the replacer
+// are compiled once: decodeEscapes runs on every line of every source
+// dictionary, which is hundreds of thousands of lines.
+var (
+	reUnicode = regexp.MustCompile(`\\[uU][0-9a-fA-F]{4,8}`)
+	reHex     = regexp.MustCompile(`\\x[0-9a-fA-F]{2}`)
+	reOctal   = regexp.MustCompile(`\\[0-7]{1,3}`)
 
-	// Unescape 2-digit hex escapes
-	reHex := regexp.MustCompile(`\\x[0-9a-fA-F]{2}`)
-	s = reHex.ReplaceAllStringFunc(s, func(match string) string {
-		r, err := strconv.ParseUint(match[2:], 16, 8)
-		if err != nil {
-			return match // Return the original match if there's an error
-		}
-
-		return string(rune(r))
-	})
-
-	// Unescape octal escapes
-	reOctal := regexp.MustCompile(`\\[0-7]{1,3}`)
-	s = reOctal.ReplaceAllStringFunc(s, func(match string) string {
-		r, err := strconv.ParseUint(match[1:], 8, 8)
-		if err != nil {
-			return match // Return the original match if there's an error
-		}
-
-		return string(rune(r))
-	})
-
-	// Unescape basic escape sequences
-	replacements := []string{
+	basicEscapes = strings.NewReplacer(
 		`\\`, `\`,
 		`\"`, `"`,
 		`\'`, `'`,
@@ -59,9 +31,42 @@ func decodeEscapes(s string) string {
 		`\f`, "\f",
 		`\a`, "\a",
 		`\v`, "\v",
-	}
+	)
+)
 
-	return strings.NewReplacer(replacements...).Replace(s)
+// decodeEscapes decodes escape sequences in a string.
+func decodeEscapes(s string) string {
+	// Unescape Unicode sequences
+	s = reUnicode.ReplaceAllStringFunc(s, func(match string) string {
+		r, err := strconv.ParseInt(match[2:], 16, 32)
+		if err != nil {
+			return match // Return the original match if there's an error
+		}
+
+		return string(rune(r))
+	})
+
+	// Unescape 2-digit hex escapes
+	s = reHex.ReplaceAllStringFunc(s, func(match string) string {
+		r, err := strconv.ParseUint(match[2:], 16, 8)
+		if err != nil {
+			return match // Return the original match if there's an error
+		}
+
+		return string(rune(r))
+	})
+
+	// Unescape octal escapes
+	s = reOctal.ReplaceAllStringFunc(s, func(match string) string {
+		r, err := strconv.ParseUint(match[1:], 8, 8)
+		if err != nil {
+			return match // Return the original match if there's an error
+		}
+
+		return string(rune(r))
+	})
+
+	return basicEscapes.Replace(s)
 }
 
 // deref dereferences a pointer.
@@ -140,38 +145,32 @@ func mapSet[K comparable, T any](m *ordered.OrderedMap[K, T], k K, v T) *ordered
 	return m
 }
 
-// traverseFile reads a file line by line and sends each line to a channel.
-// Empty lines and lines starting with ";;" are ignored.
-// The function returns a channel that will be closed when the file has been fully read.
-// It also takes a context that can be used to cancel the operation.
-func traverseFile(ctx context.Context, in *os.File) <-chan string {
-	sc := bufio.NewScanner(in)
-	sc.Split(bufio.ScanLines)
-	lines := make(chan string, 1)
+// traverseFile reads a file line by line and passes each line to fn.
+// Empty lines and lines starting with ";;" are ignored, and escape sequences
+// are decoded before fn is called. It stops and returns the first error
+// reported by fn or by the underlying scanner.
+func traverseFile(src string, fn func(line string) error) error {
+	f, err := os.Open(src)
+	if err != nil {
+		return err
+	}
 
-	go func(sc *bufio.Scanner, lines chan<- string) {
-		for sc.Scan() {
-			select {
+	defer f.Close()
 
-			case <-ctx.Done():
-				close(lines)
-				return
+	sc := bufio.NewScanner(f)
+	for sc.Scan() {
+		switch line := strings.TrimSpace(sc.Text()); {
 
-			default:
-				switch line := strings.TrimSpace(sc.Text()); {
+		case len(line) == 0, strings.HasPrefix(line, ";;"):
+			continue
 
-				case len(line) == 0, strings.HasPrefix(line, ";;"):
-					continue
-
-				default:
-					lines <- decodeEscapes(line)
-				}
+		default:
+			if err := fn(decodeEscapes(line)); err != nil {
+				return err
 			}
 
 		}
+	}
 
-		close(lines)
-	}(sc, lines)
-
-	return lines
+	return sc.Err()
 }

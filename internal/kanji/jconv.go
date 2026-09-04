@@ -8,88 +8,85 @@ import (
 	"github.com/sarumaj/go-kakasi/internal/codegen"
 )
 
+// cacheSize is the number of conversion results kept in memory.
+const cacheSize = 512
+
 // JConv is a type that represents a Japanese text converter.
 // It is used to convert Japanese text to yomi reading.
 // It is based on Original KAKASI's EUC_JP - alphabet converter table.
 type JConv struct {
-	cache  *lru.Cache[string, string]
+	cache  *lru.Cache[string, jconvResult]
 	kanwa  *Kanwa
 	itaiji *Itaiji
 }
 
-// Convert converts the input text to the yomi reading.
-func (j *JConv) Convert(iText, bText string) (string, int, error) {
-	var converted string
-	var max_length int
+// jconvResult is a cached conversion result. It is stored as a struct rather
+// than a formatted string so that yomi values containing the key separator
+// round-trip correctly.
+type jconvResult struct {
+	Yomi   string
+	Length int
+}
 
-	// check if the conversion is already cached
-	cached, ok := j.cache.Get(iText + ":" + bText)
-	if ok {
-		if _, err := fmt.Sscanf(cached, "%s:%d", &converted, &max_length); err == nil {
-			return converted, max_length, nil
-		}
+// Convert converts the input text to the yomi reading.
+// It returns the yomi of the longest dictionary entry that is a prefix of
+// iText, together with the length of that prefix in runes. bText is the
+// preceding text, used to disambiguate context-dependent readings.
+func (j *JConv) Convert(iText, bText string) (string, int, error) {
+	key := iText + "\x00" + bText
+	if cached, ok := j.cache.Get(key); ok {
+		return cached.Yomi, cached.Length, nil
 	}
 
 	// convert itaiji characters to their original form
 	text := j.itaiji.Convert(iText)
-	if len([]rune(text)) == 0 {
+	if len(text) == 0 {
 		return "", 0, fmt.Errorf("input text is empty")
 	}
 
-	// calculate the number of changed characters
-	num_changed_ch := len([]rune(iText)) - len([]rune(text))
+	textRunes, iRunes := []rune(text), []rune(iText)
 
-	// load the kanwa table for the first character of the input text
-	table := j.kanwa.Load([]rune(text)[0])
-	if table == nil {
-		return "", 0, fmt.Errorf("no kanwa table found for the first character of the input text: %s", string([]rune(text[:1])))
+	converted, maxLength := j.kanwa.Lookup(textRunes, bText)
+	if maxLength == 0 && !j.kanwa.HasEntry(textRunes[0]) {
+		return "", 0, fmt.Errorf("no kanwa table found for the first character of the input text: %q", textRunes[0])
 	}
 
-	// iterate through the kanwa table to find the longest matching key
-	iterator := table.Iter()
-	for k, vs, ok := iterator(); ok; k, vs, ok = iterator() {
-		key_length := len([]rune(k))
-
-		// if the key is longer than the input text, skip
-		switch {
-		case
-			len([]rune(text)) < key_length,
-			k != string([]rune(text)[:key_length]):
-
-			continue
-		}
-
-		for _, v := range vs {
-			// retrieve the yomi and context of the key
-			if (len(v.Ctx) == 0 || v.Ctx.Contains(bText)) && max_length < key_length {
-				converted = v.Yomi
-				max_length = key_length
-			}
-		}
-	}
-
-	// when converting string with kanji variant, the length of the converted string is not equal to the original string
-	// thus, calculate max_length to get the correct length of the converted string
-	for i := 0; i < num_changed_ch; i++ {
-		if max_length > len([]rune(iText)) {
+	// When the input contains kanji variants, the itaiji substitution shortens
+	// the text, so the match length measured against the substituted text has
+	// to be mapped back onto the original one.
+	numChangedCh := len(iRunes) - len(textRunes)
+	for i := 0; i < numChangedCh; i++ {
+		if maxLength > len(iRunes) {
 			break
 		}
 
 		switch {
-		case
-			// if the last character of the input text is a classified hiragana
-			[]rune(text)[max_length-1] != []rune(iText)[max_length-1],
-			// if the last character of the input text is an ideograph
-			max_length < num_changed_ch+len([]rune(text)) &&
-				max_length >= len([]rune(iText)) &&
-				j.IsVSCHR([]rune(iText)[max_length]):
+		// The match consumed a character that the substitution replaced, so
+		// the original text is one rune longer at this position.
+		case maxLength >= 1 && maxLength <= len(textRunes) && maxLength <= len(iRunes) &&
+			textRunes[maxLength-1] != iRunes[maxLength-1]:
 
-			max_length++
+			maxLength++
+
+		// The character just past the match is a variation selector that the
+		// substitution dropped; it belongs to the same entry, so consume it.
+		case maxLength < len(iRunes) && j.IsVSCHR(iRunes[maxLength]):
+			maxLength++
+
+		default:
+			// Neither compensation applies, so no further iteration can make
+			// progress.
+			return j.remember(key, converted, maxLength)
 		}
 	}
 
-	defer j.cache.Add(iText+":"+bText, fmt.Sprintf("%s:%d", converted, max_length))
-	return converted, max_length, nil
+	return j.remember(key, converted, maxLength)
+}
+
+// remember caches a conversion result and returns it.
+func (j *JConv) remember(key, yomi string, length int) (string, int, error) {
+	j.cache.Add(key, jconvResult{Yomi: yomi, Length: length})
+	return yomi, length, nil
 }
 
 // IsCLetter returns true if the character is a classified hiragana.
@@ -109,7 +106,7 @@ func (j *JConv) IsRegion(ch rune) bool {
 }
 
 func NewJConv() (*JConv, error) {
-	cache, err := lru.New[string, string](512)
+	cache, err := lru.New[string, jconvResult](cacheSize)
 	if err != nil {
 		return nil, err
 	}

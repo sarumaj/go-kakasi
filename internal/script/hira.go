@@ -2,6 +2,7 @@ package script
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/sarumaj/go-kakasi/internal/codegen"
 	"github.com/sarumaj/go-kakasi/internal/properties"
@@ -42,37 +43,34 @@ func (h Hira) Convert(text string) (string, int, error) {
 }
 
 // convertK converts Hiragana and Extended Kana characters to Katakana characters.
+// It stops at the first character that is neither, and reports how many runes
+// it consumed.
 func (h Hira) convertK(text string) (string, int, error) {
-	var converted string
-	var max_length int
+	const (
+		diff  rune = 0x30A1 - 0x3041
+		eDiff rune = 0x1B164 - 0x1B150
+	)
 
-	var diff rune = 0x30A1 - 0x3041
-	var eDiff rune = 0x1B164 - 0x1B150
+	var converted strings.Builder
+	var maxLength int
 
 	for _, r := range text {
-		var abort bool
-		// character is a Hiragana or an Extended Kana character
 		switch {
 		case 0x3040 < r && r < 0x3097:
-			converted += string(r + diff)
-			max_length++
+			converted.WriteRune(r + diff)
 
 		case 0x1B150 <= r && r <= 0x1B152:
-			converted += string(r + eDiff)
-			max_length++
+			converted.WriteRune(r + eDiff)
 
 		default:
-			abort = true
+			return converted.String(), maxLength, nil
 
 		}
 
-		if abort {
-			break
-		}
+		maxLength++
 	}
 
-	return converted, max_length, nil
-
+	return converted.String(), maxLength, nil
 }
 
 // IsRegion returns true if the given character is a Hiragana or an Extended Kana character.

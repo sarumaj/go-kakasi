@@ -25,6 +25,35 @@ var (
 	alpha  = script.Alpha{}
 )
 
+// normalizer folds the punctuation variants that the NFKC pass below does not
+// unify. It is stateless, so it is built once and shared by all callers.
+//
+// Note that the first mapping for a given input wins, so the hyphen-like
+// characters that appear twice below resolve to "-", not "ー".
+var normalizer = strings.NewReplacer(
+	"〜", "ー",
+	"～", "ー",
+	"’", "'",
+	"”", "\"",
+	"“", "\"",
+	"―", "-",
+	"‐", "-",
+	"˗", "-",
+	"֊", "-",
+	"‑", "-",
+	"‒", "-",
+	"–", "-",
+	"⁃", "-",
+	"⁻", "-",
+	"₋", "-",
+	"−", "-",
+	"﹣", "ー",
+	"－", "ー",
+	"—", "ー",
+	"━", "ー",
+	"─", "ー",
+)
+
 type chType int
 
 // IConverted is a type that represents a converted text.
@@ -41,17 +70,35 @@ type Kakasi struct {
 
 // Convert converts the input text to kana/romaji.
 func (k Kakasi) Convert(text string) (IConvertedSlice, error) {
-	if len([]rune(text)) == 0 {
+	runes := []rune(text)
+	if len(runes) == 0 {
 		return IConvertedSlice{{}}, nil
 	}
 
-	var originalText, kanaText string
 	var results IConvertedSlice
+	// orig and kana accumulate the token that is currently being read: orig
+	// holds it as written, kana holds its reading.
+	var orig, kana string
+
+	// flush appends the pending token to the results and clears the buffer.
+	// Tokens that cannot be converted are dropped.
+	flush := func() {
+		if len(orig) == 0 {
+			return
+		}
+
+		if result, err := k.iConv.Convert(orig, kana); err == nil {
+			results = append(results, *result)
+		}
+
+		orig, kana = "", ""
+	}
+
 	var fBuffer bool // output buffer flag
 	var fText bool   // output text flag
 	var fCpInc bool  // output copy and increment flag
-	for i, t := 0, chKanji; i < len([]rune(text)); {
-		switch ch := []rune(text)[i]; {
+	for i, t := 0, chKanji; i < len(runes); {
+		switch ch := runes[i]; {
 
 		case properties.Ch.IsEndmark(ch):
 			fBuffer, fText, fCpInc, t = true, true, true, chSymbol
@@ -59,9 +106,10 @@ func (k Kakasi) Convert(text string) (IConvertedSlice, error) {
 		case properties.Ch.IsLongSymbol(ch):
 			fBuffer, fText, fCpInc = false, false, true
 
-		case symbol.IsRegion(ch):
-			fBuffer, fText, fCpInc, t = t != chSymbol, t == chSymbol, true, chSymbol
-
+		// Script regions are tested before symbols: Symbol.IsRegion spans
+		// U+0391..U+30A1 (upstream pykakasi carries the same range), which
+		// overlaps hiragana and part of katakana, so testing it first would
+		// fold kana into symbol tokens.
 		case kata.IsRegion(ch):
 			fBuffer, fText, fCpInc, t = t != chKana, false, true, chKana
 
@@ -71,51 +119,39 @@ func (k Kakasi) Convert(text string) (IConvertedSlice, error) {
 		case alpha.IsRegion(ch):
 			fBuffer, fText, fCpInc, t = t != chAlpha, false, true, chAlpha
 
-		case k.jConv.IsRegion(ch):
-			if len([]rune(originalText)) > 0 {
-				result, err := k.iConv.Convert(originalText, kanaText)
-				if err == nil {
-					results = append(results, *result)
-				}
-			}
+		case symbol.IsRegion(ch):
+			fBuffer, fText, fCpInc, t = t != chSymbol, t == chSymbol, true, chSymbol
 
-			converted, length, _ := k.jConv.Convert(string([]rune(text)[i:]), originalText)
+		case k.jConv.IsRegion(ch):
+			// The pending token is the context that disambiguates
+			// context-dependent readings, so capture it before flushing.
+			ctx := orig
+			flush()
+
+			converted, length, _ := k.jConv.Convert(string(runes[i:]), ctx)
 			t = chKanji
 
 			if length > 0 {
-				originalText = string([]rune(text)[i : i+length])
-				kanaText = converted
+				orig, kana = string(runes[i:i+length]), converted
 				i += length
 				fBuffer, fText, fCpInc = false, false, false
 
 			} else { // unknown kanji
-				originalText = string([]rune(text)[i])
-				kanaText = ""
+				orig, kana = string(runes[i]), ""
 				i++
 				fBuffer, fText, fCpInc = true, false, false
 
 			}
 
 		case 0xF000 <= ch && ch <= 0xFFFD, 0x10000 <= ch && ch <= 0x10FFFD: // PUA, ignore and drop
-			if len([]rune(originalText)) > 0 {
-				result, err := k.iConv.Convert(originalText, kanaText)
-				if err == nil {
-					results = append(results, *result)
-				}
-			}
+			flush()
 			i++
 			fBuffer, fText, fCpInc = false, false, false
 
 		default:
-			if len([]rune(originalText)) > 0 {
-				result, err := k.iConv.Convert(originalText, kanaText)
-				if err == nil {
-					results = append(results, *result)
-				}
-			}
+			flush()
 
-			result, err := k.iConv.Convert(string([]rune(text)[i]), "")
-			if err == nil {
+			if result, err := k.iConv.Convert(string(runes[i]), ""); err == nil {
 				results = append(results, *result)
 			}
 
@@ -127,41 +163,23 @@ func (k Kakasi) Convert(text string) (IConvertedSlice, error) {
 		// convert to kana and output based on flags
 		switch {
 		case fBuffer && fText:
-			originalText += string([]rune(text)[i])
-			kanaText += string([]rune(text)[i])
-
-			result, err := k.iConv.Convert(originalText, kanaText)
-			if err == nil {
-				results = append(results, *result)
-			}
-
-			originalText, kanaText = "", ""
+			orig, kana = orig+string(runes[i]), kana+string(runes[i])
+			flush()
 			i++
 
 		case fBuffer && fCpInc:
-			if len([]rune(originalText)) > 0 {
-				result, err := k.iConv.Convert(originalText, kanaText)
-				if err == nil {
-					results = append(results, *result)
-				}
-			}
-			originalText, kanaText = string([]rune(text)[i]), string([]rune(text)[i])
+			flush()
+			orig, kana = string(runes[i]), string(runes[i])
 			i++
 
 		case fCpInc:
-			originalText += string([]rune(text)[i])
-			kanaText += string([]rune(text)[i])
+			orig, kana = orig+string(runes[i]), kana+string(runes[i])
 			i++
 
 		}
 	}
 
-	if len([]rune(originalText)) > 0 {
-		result, err := k.iConv.Convert(originalText, kanaText)
-		if err == nil {
-			results = append(results, *result)
-		}
-	}
+	flush()
 
 	return results, nil
 }
@@ -169,32 +187,7 @@ func (k Kakasi) Convert(text string) (IConvertedSlice, error) {
 // Normalize normalizes the input text.
 // It converts the input text to NFKC and standardizes long symbols.
 func (Kakasi) Normalize(text string) (string, error) {
-	text = strings.NewReplacer(
-		"〜", "ー",
-		"～", "ー",
-		"’", "'",
-		"”", "\"",
-		"“", "\"",
-		"―", "-",
-		"‐", "-",
-		"˗", "-",
-		"֊", "-",
-		"‐", "-",
-		"‑", "-",
-		"‒", "-",
-		"–", "-",
-		"⁃", "-",
-		"⁻", "-",
-		"₋", "-",
-		"−", "-",
-		"﹣", "ー",
-		"－", "ー",
-		"—", "ー",
-		"―", "ー",
-		"━", "ー",
-		"─", "ー",
-	).Replace(text)
-	return norm.Form(norm.NFKC).String(text), nil
+	return norm.NFKC.String(normalizer.Replace(text)), nil
 }
 
 func NewKakasi() (*Kakasi, error) {

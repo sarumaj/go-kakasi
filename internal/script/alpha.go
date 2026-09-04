@@ -2,6 +2,7 @@ package script
 
 import (
 	"fmt"
+	"unicode/utf8"
 
 	"github.com/sarumaj/go-kakasi/internal/properties"
 )
@@ -37,11 +38,12 @@ func (a Alpha) convertE(text string) (string, int, error) {
 	var converted string
 	var max_length int
 
-	if len([]rune(text)) == 0 {
+	if len(text) == 0 {
 		return "", 0, fmt.Errorf("input text is empty")
 	}
 
-	switch ch := []rune(text)[0]; {
+	ch, _ := utf8.DecodeRuneInString(text)
+	switch {
 
 	case properties.Ch.Space() <= ch && ch <= properties.Ch.AtMark():
 		converted = properties.ConvertTables.AlphaTable1()[ch]
@@ -60,7 +62,7 @@ func (a Alpha) convertE(text string) (string, int, error) {
 
 	}
 
-	if len([]rune(converted)) > 0 {
+	if len(converted) > 0 {
 		max_length = 1
 	}
 

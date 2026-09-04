@@ -1,7 +1,6 @@
 package codegen
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -113,6 +112,12 @@ func (m KanjiCtxMap) Get(k string) []KanjiCtxPair {
 
 func (m KanjiCtxMap) Has(k string) bool {
 	return mapHas(ordered.OrderedMap[string, []KanjiCtxPair](m), k)
+}
+
+// Lookup returns the value stored under k and reports whether it was present.
+func (m KanjiCtxMap) Lookup(k string) ([]KanjiCtxPair, bool) {
+	o := ordered.OrderedMap[string, []KanjiCtxPair](m)
+	return o.Get(k)
 }
 
 func (m KanjiCtxMap) Iter() func() (string, []KanjiCtxPair, bool) {
@@ -233,18 +238,11 @@ func makeKanwaMap(src_list []string) (*KanwaMap, error) {
 
 	m := (*KanwaMap)(ordered.New[rune, KanjiCtxMap]())
 	for _, src := range src_list {
-		f, err := os.OpenFile(src, os.O_RDONLY, os.ModePerm)
-		if err != nil {
-			return nil, err
-		}
-
-		defer f.Close()
-
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
-
-		for line := range traverseFile(ctx, f) {
+		if err := traverseFile(src, func(line string) error {
 			m.parseLine(line)
+			return nil
+		}); err != nil {
+			return nil, err
 		}
 	}
 
@@ -255,21 +253,24 @@ func makeKanwaMap(src_list []string) (*KanwaMap, error) {
 // It returns an error if the source files are invalid.
 // The source files are invalid if they are not in the list of resources or if they do not exist.
 func verifyKanwaMapSourceList(src_list []string) error {
-	if len(src_list) == 0 {
-		return nil
-	}
-
-	for _, v_list := range kanwaMapResources {
-		for _, v := range v_list {
-			if v == src_list[0] {
-				_, err := os.Stat(src_list[0])
-				return err
+	for _, src := range src_list {
+		var known bool
+		for _, v_list := range kanwaMapResources {
+			for _, v := range v_list {
+				if v == src {
+					known = true
+				}
 			}
 		}
-	}
-	if len(src_list) > 1 {
-		return verifyKanwaMapSourceList(src_list[1:])
+
+		if !known {
+			return fmt.Errorf("invalid source: %s", src)
+		}
+
+		if _, err := os.Stat(src); err != nil {
+			return err
+		}
 	}
 
-	return fmt.Errorf("invalid source: %v", src_list)
+	return nil
 }

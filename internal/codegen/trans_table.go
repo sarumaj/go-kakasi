@@ -1,7 +1,6 @@
 package codegen
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -26,7 +25,7 @@ func (m TransTable) Iter() func() (rune, *string, bool) {
 }
 
 func (m TransTable) Get(c rune) string {
-	return deref[string](mapGet(ordered.OrderedMap[rune, *string](m), c))
+	return deref(mapGet(ordered.OrderedMap[rune, *string](m), c))
 }
 
 func (m TransTable) Keys() []rune { return mapKeys(ordered.OrderedMap[rune, *string](m)) }
@@ -50,9 +49,7 @@ func (m *TransTable) spoof(lo, hi int64) {
 			continue
 		}
 
-		o := (*ordered.OrderedMap[rune, *string])(m)
-		o.Set(c, nil)
-		m = (*TransTable)(o)
+		(*ordered.OrderedMap[rune, *string])(m).Set(c, nil)
 	}
 }
 
@@ -68,33 +65,29 @@ func makeTransTable(src string) (*TransTable, error) {
 		return nil, err
 	}
 
-	f, err := os.OpenFile(src, os.O_RDONLY, os.ModePerm)
-	if err != nil {
+	m := (*TransTable)(ordered.New[rune, *string]())
+	if err := traverseFile(src, func(line string) error {
+		v, k, ok := strings.Cut(line, " ")
+		if !ok {
+			return fmt.Errorf("invalid line: %s", line)
+		}
+
+		runes := []rune(k)
+		if len(runes) != 1 {
+			return fmt.Errorf("invalid key: %q", k)
+		}
+
+		m.Set(runes[0], v)
+		return nil
+	}); err != nil {
 		return nil, err
 	}
 
-	defer f.Close()
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	m := (*TransTable)(ordered.New[rune, *string]())
-	for line := range traverseFile(ctx, f) {
-		v, k, ok := strings.Cut(line, " ")
-		if !ok {
-			return nil, fmt.Errorf("invalid line: %s", line)
-		}
-
-		if l := len([]rune(k)); l > 1 || l == 0 {
-			return nil, fmt.Errorf("invalid key: %q", k)
-		}
-
-		c := []rune(k)[0]
-		m.Set(c, v)
-	}
-
+	// Variation selectors carry no reading of their own; they are registered
+	// so that they attach to the preceding kanji instead of splitting it off.
+	// The supplement block starts at U+E0100 (VS17), not U+E0110.
 	m.spoof(0xFE00, 0xFE02)
-	m.spoof(0xE0110, 0xE01EF)
+	m.spoof(0xE0100, 0xE01EF)
 
 	return m, nil
 }
