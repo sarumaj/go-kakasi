@@ -8,8 +8,6 @@ name: test_and_report
     - main
     - renovate/all-patch
   workflow_dispatch: null
-permissions:
-  contents: write
 jobs:
   test_and_report:
     strategy:
