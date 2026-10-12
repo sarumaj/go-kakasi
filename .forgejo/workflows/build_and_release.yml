@@ -41,13 +41,6 @@ jobs:
       shell: bash
     - name: Run tests with coverage
       run: go test ./... -coverprofile=coverage.out
-    - name: Publish code coverage
-      uses: https://github.com/qltysh/qlty-action/coverage@v2
-      with:
-        files: coverage.out
-        add-prefix: ${{ steps.export_module_name.outputs.MODULE_NAME }}
-        verbose: true
-        token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
     - name: Update code documentation
       run: curl -fsSL https://proxy.golang.org/${{ steps.export_module_name.outputs.MODULE_NAME }}/@v/${{
         github.ref_name }}.info
