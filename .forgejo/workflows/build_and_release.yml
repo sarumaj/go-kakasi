@@ -1,0 +1,53 @@
+# Converted from .github/workflows/build_and_release.yml for Forgejo by
+# scripts/github_to_forgejo.py (HomeLab); --move-ci rewrites it. Jobs needing
+# GitHub, macOS, Windows or secrets Forgejo lacks stay in the GitHub file.
+name: build_and_release
+'on':
+  push:
+    tags:
+    - v*
+jobs:
+  build_and_release:
+    strategy:
+      fail-fast: false
+      matrix:
+        go:
+        - 1.26
+        os:
+        - ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    name: Build and release ldap-cli
+    steps:
+    - name: Check out repository
+      uses: https://github.com/actions/checkout@v7
+      with:
+        fetch-depth: 0
+    - name: Install go
+      uses: https://github.com/actions/setup-go@v7
+      with:
+        go-version: ${{ matrix.go }}
+    - name: Install go tools
+      run: |
+        go install golang.org/x/tools/gopls@latest && \
+        go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+    - name: Export Module Name
+      id: export_module_name
+      run: echo "MODULE_NAME=$(go mod edit -json | jq -r '.Module.Path')" >> "$GITHUB_OUTPUT"
+    - name: Generate dynamic code samples and run linters
+      run: |
+        go generate ./...
+        gofmt -s -d $(find . -type f -name '*.go'| grep -v "/vendor/")
+        golangci-lint run -v && golangci-lint run -v --exclude-dirs-use-default -e printf
+      shell: bash
+    - name: Run tests with coverage
+      run: go test ./... -coverprofile=coverage.out
+    - name: Publish code coverage
+      uses: https://github.com/qltysh/qlty-action/coverage@v2
+      with:
+        files: coverage.out
+        add-prefix: ${{ steps.export_module_name.outputs.MODULE_NAME }}
+        verbose: true
+        token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
+    - name: Update code documentation
+      run: curl -fsSL https://proxy.golang.org/${{ steps.export_module_name.outputs.MODULE_NAME }}/@v/${{
+        github.ref_name }}.info
