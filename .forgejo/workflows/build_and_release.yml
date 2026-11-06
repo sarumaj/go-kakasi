@@ -6,6 +6,14 @@ name: build_and_release
   push:
     tags:
     - v*
+  # Run by hand to retry a tag's release from main, with the tag in the field
+  # (a tag made before this trigger existed has no workflow_dispatch of its own).
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: The tag to release (vX.Y.Z); empty for the tag chosen above
+        type: string
+        required: false
 jobs:
   build_and_release:
     strategy:
@@ -18,9 +26,18 @@ jobs:
     runs-on: ${{ matrix.os }}
     name: Build and release ldap-cli
     steps:
+    - name: Check the tag
+      env:
+        TAG: ${{ inputs.tag || github.ref_name }}
+      run: |
+        case "$TAG" in
+          v[0-9]*) ;;
+          *) echo "::error::$TAG is not a release tag: name one in the tag field"; exit 1 ;;
+        esac
     - name: Check out repository
       uses: https://github.com/actions/checkout@v7
       with:
+        ref: ${{ inputs.tag && format('refs/tags/{0}', inputs.tag) || github.ref }}
         fetch-depth: 0
     - name: Install go
       uses: https://github.com/actions/setup-go@v7
@@ -41,5 +58,4 @@ jobs:
     - name: Run tests with coverage
       run: go test ./... -coverprofile=coverage.out
     - name: Update code documentation
-      run: curl -fsSL https://proxy.golang.org/${{ steps.export_module_name.outputs.MODULE_NAME }}/@v/${{
-        github.ref_name }}.info
+      run: curl -fsSL https://proxy.golang.org/${{ steps.export_module_name.outputs.MODULE_NAME }}/@v/${{ inputs.tag || github.ref_name }}.info
